@@ -1,0 +1,33 @@
+#Android 
+*.apk
+*.jks
+.gradle
+/gradle
+/local.properties
+/captures
+/.idea
+/build
+gradle.properties
+
+#Eclipse
+.project
+.classpath
+.settings
+
+#IntelliJ IDEA
+.idea
+*.iml
+classes
+
+#Maven
+target
+release.properties
+pom.xml.*
+
+#Command line
+local.properties
+build.xml
+proguard-project.txt
+
+#Mac OS
+.DS_Store
