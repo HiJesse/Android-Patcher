@@ -12,15 +12,23 @@ import android.content.res.Resources;
  * Created by jesse on 15/11/2016.
  */
 public abstract class AbsApplicationProxy implements ApplicationProxy {
+    //Application,resource,assetManager,classLoader的引用
     private final Application application;
-    private final Intent patcherResultIntent;
-    private final long        applicationStartElapsedTime;
-    private final long        applicationStartMillisTime;
-    private final int         patchFlags;
-    private final boolean     patchLoadVerifyFlag;
     private Resources[]    resources;
     private ClassLoader[]  classLoader;
     private AssetManager[] assetManager;
+
+    //用于记录启动加载patcher loader的状态
+    private final Intent patcherResultIntent;
+
+    //系统的存活时间和app启动时刻
+    private final long applicationStartElapsedTime;
+    private final long applicationStartMillisTime;
+
+    //注解中的两个flags
+    private final int patchFlags;
+    private final boolean patchLoadVerifyFlag;
+
 
     public AbsApplicationProxy(Application application, int patchFlags, boolean patchLoadVerifyFlag,
                                long applicationStartElapsedTime, long applicationStartMillisTime, Intent patcherResultIntent,

@@ -8,11 +8,13 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.Log;
 
+import cn.jesse.patcher.loader.Constants;
+
 /**
  * Created by jesse on 15/11/2016.
  */
 public class DefaultApplicationProxy extends AbsApplicationProxy {
-    private final String TAG = "Patcher." + getClass().getSimpleName();
+    private final String TAG = Constants.LOADER_TAG + "AppProxy";
 
     public DefaultApplicationProxy(Application application, int patchFlags, boolean patchLoadVerifyFlag,
                                    long applicationStartElapsedTime, long applicationStartMillisTime, Intent patcherResultIntent,

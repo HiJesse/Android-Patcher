@@ -22,15 +22,15 @@ public @interface PatcherApplication {
     /**
      * patch loader
      */
-    String loaderClass() default "com.tencent.tinker.loader.TinkerLoader";
+    String loaderClass() default "cn.jesse.patcher.loader.PatcherLoader";
 
     /**
      * 支持的文件类型
-     * ShareConstants.TINKERDISABLE:不支持任何类型的文件
-     * ShareConstants.TINKERDEXONLY:只支持dex文件
-     * ShareConstants.TINKERLIBRARYONLY:只支持library文件
-     * ShareConstants.TINKERDEXANDLIBRARY:只支持dex与res的修改
-     * ShareConstants.TINKERENABLEALL:支持任何类型的文件，也是我们通常的设置的模式
+     * Constants.PATCHER_DISABLE:不支持任何类型的文件
+     * Constants.PATCHER_DEXONLY:只支持dex文件
+     * Constants.PATCHER_LIBRARYONLY:只支持library文件
+     * Constants.PATCHER_DEXANDLIBRARY:只支持dex与res的修改
+     * Constants.PATCHER_ENABLEALL:支持任何类型的文件，也是我们通常的设置的模式
      */
     int flags();
 
