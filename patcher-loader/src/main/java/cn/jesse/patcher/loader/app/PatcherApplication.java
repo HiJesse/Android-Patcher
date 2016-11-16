@@ -105,17 +105,24 @@ public class PatcherApplication extends Application {
      * here since {@link android.app.Application#onCreate} will not have yet been called.
      */
     private void onBaseContextAttached(Context base) {
+        //记录系统启动时间和App启动时刻
         applicationStartElapsedTime = SystemClock.elapsedRealtime();
         applicationStartMillisTime = System.currentTimeMillis();
+
+        //初始化patch loader, 并且调用tryLoad方法
         loadPatcher();
+        //确保代理Application对象已经被创建出来了
         ensureDelegate();
+
+        //反射调用代理Application的`onBaseContextAttached`方法同步声明周期
         try {
             Method method = ReflectUtil.findMethod(delegate, "onBaseContextAttached", Context.class);
             method.invoke(delegate, base);
         } catch (Throwable t) {
             throw new PatcherRuntimeException("onBaseContextAttached method not found", t);
         }
-        //reset save mode
+
+        //重置safe mode计数, 当safe mode计数不小于三次时PatcherResultIntent会记录patch失败
         if (useSafeMode) {
             String processName = PatcherInternals.getProcessName(this);
             String preferName = Constants.PATCHER_OWN_PREFERENCE_CONFIG + processName;
