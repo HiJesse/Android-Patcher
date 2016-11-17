@@ -35,6 +35,7 @@ public class ApplicationProxy extends DefaultApplicationProxy{
         super.onBaseContextAttached(base);
         Log.d(TAG, getApplicationStartElapsedTime() + "");
         Log.d(TAG, getApplicationStartMillisTime() + "");
+        Log.d(TAG, getPatcherResultIntent().getExtras().toString());
     }
 
     @Override

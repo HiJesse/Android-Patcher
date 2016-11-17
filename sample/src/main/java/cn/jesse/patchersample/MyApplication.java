@@ -1,5 +1,8 @@
 package cn.jesse.patchersample;
 
+
+import cn.jesse.patcher.loader.Constants;
+import cn.jesse.patcher.loader.PatcherLoader;
 import cn.jesse.patcher.loader.app.PatcherApplication;
 
 /**
@@ -8,6 +11,7 @@ import cn.jesse.patcher.loader.app.PatcherApplication;
 public class MyApplication extends PatcherApplication {
 
     public MyApplication() {
-        super(7);
+        super(Constants.PATCHER_ENABLE_ALL, "cn.jesse.patchersample.ApplicationProxy", PatcherLoader.class.getName(), false);
     }
+
 }
