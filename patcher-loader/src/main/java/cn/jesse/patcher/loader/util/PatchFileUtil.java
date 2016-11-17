@@ -26,7 +26,7 @@ public class PatchFileUtil {
     private static final String TAG = Constants.LOADER_TAG + "PatchFileUtil";
 
     /**
-     * data dir, such as /data/data/tinker.sample.android/tinker
+     * data dir, such as /data/data/cn.jesse.patchersample/patcher
      * @param context
      * @return
      */
