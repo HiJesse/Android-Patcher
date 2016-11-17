@@ -30,7 +30,7 @@ public class PatcherInternals {
      * or you may just hardcode them in your app
      */
     private static String processName = null;
-    private static String tinkerID = null;
+    private static String PatcherID = null;
 
     public static boolean isVmArt() {
         return VM_IS_ART;
@@ -46,15 +46,15 @@ public class PatcherInternals {
     /**
      * thinker package check
      * @param context
-     * @param tinkerFlag
+     * @param PatcherFlag
      * @param patchFile
      * @param securityCheck
      * @return
      */
-    public static int checkTinkerPackage(Context context, int tinkerFlag, File patchFile, SecurityCheck securityCheck) {
-        int returnCode = checkSignatureAndTinkerID(context, patchFile, securityCheck);
+    public static int checkPatcherPackage(Context context, int PatcherFlag, File patchFile, SecurityCheck securityCheck) {
+        int returnCode = checkSignatureAndPatcherID(context, patchFile, securityCheck);
         if (returnCode == Constants.ERROR_PACKAGE_CHECK_OK) {
-            returnCode = checkPackageAndTinkerFlag(securityCheck, tinkerFlag);
+            returnCode = checkPackageAndPatcherFlag(securityCheck, PatcherFlag);
         }
         return returnCode;
     }
@@ -66,13 +66,13 @@ public class PatcherInternals {
      * @param securityCheck
      * @return
      */
-    public static int checkSignatureAndTinkerID(Context context, File patchFile, SecurityCheck securityCheck) {
+    public static int checkSignatureAndPatcherID(Context context, File patchFile, SecurityCheck securityCheck) {
         if (!securityCheck.verifyPatchMetaSignature(patchFile)) {
             return Constants.ERROR_PACKAGE_CHECK_SIGNATURE_FAIL;
         }
 
-        String oldTinkerId = getManifestTinkerID(context);
-        if (oldTinkerId == null) {
+        String oldPatcherId = getManifestPatcherID(context);
+        if (oldPatcherId == null) {
             return Constants.ERROR_PACKAGE_CHECK_APK_PATCHER_ID_NOT_FOUND;
         }
 
@@ -82,34 +82,34 @@ public class PatcherInternals {
             return Constants.ERROR_PACKAGE_CHECK_PACKAGE_META_NOT_FOUND;
         }
 
-        String patchTinkerId = properties.get(Constants.PATCHER_ID);
-        if (patchTinkerId == null) {
+        String patchPatcherId = properties.get(Constants.PATCHER_ID);
+        if (patchPatcherId == null) {
             return Constants.ERROR_PACKAGE_CHECK_PATCH_PATCHER_ID_NOT_FOUND;
         }
-        if (!oldTinkerId.equals(patchTinkerId)) {
+        if (!oldPatcherId.equals(patchPatcherId)) {
             return Constants.ERROR_PACKAGE_CHECK_PATCHER_ID_NOT_EQUAL;
         }
         return Constants.ERROR_PACKAGE_CHECK_OK;
     }
 
 
-    public static int checkPackageAndTinkerFlag(SecurityCheck securityCheck, int tinkerFlag) {
-        if (isTinkerEnabledAll(tinkerFlag)) {
+    public static int checkPackageAndPatcherFlag(SecurityCheck securityCheck, int PatcherFlag) {
+        if (isPatcherEnabledAll(PatcherFlag)) {
             return Constants.ERROR_PACKAGE_CHECK_OK;
         }
         HashMap<String, String> metaContentMap = securityCheck.getMetaContentMap();
         //check dex
-        boolean dexEnable = isTinkerEnabledForDex(tinkerFlag);
+        boolean dexEnable = isPatcherEnabledForDex(PatcherFlag);
         if (!dexEnable && metaContentMap.containsKey(Constants.DEX_META_FILE)) {
             return Constants.ERROR_PACKAGE_CHECK_PATCHERFLAG_NOT_SUPPORT;
         }
         //check native library
-        boolean nativeEnable = isTinkerEnabledForNativeLib(tinkerFlag);
+        boolean nativeEnable = isPatcherEnabledForNativeLib(PatcherFlag);
         if (!nativeEnable && metaContentMap.containsKey(Constants.SO_META_FILE)) {
             return Constants.ERROR_PACKAGE_CHECK_PATCHERFLAG_NOT_SUPPORT;
         }
         //check resource
-        boolean resEnable = isTinkerEnabledForResource(tinkerFlag);
+        boolean resEnable = isPatcherEnabledForResource(PatcherFlag);
         if (!resEnable && metaContentMap.containsKey(Constants.RES_META_FILE)) {
             return Constants.ERROR_PACKAGE_CHECK_PATCHERFLAG_NOT_SUPPORT;
         }
@@ -152,9 +152,9 @@ public class PatcherInternals {
             PatchFileUtil.closeZip(zipFile);
         }
     }
-    public static String getManifestTinkerID(Context context) {
-        if (tinkerID != null) {
-            return tinkerID;
+    public static String getManifestPatcherID(Context context) {
+        if (PatcherID != null) {
+            return PatcherID;
         }
         try {
             ApplicationInfo appInfo = context.getPackageManager()
@@ -163,26 +163,26 @@ public class PatcherInternals {
 
             Object object = appInfo.metaData.get(Constants.PATCHER_ID);
             if (object != null) {
-                tinkerID = String.valueOf(object);
+                PatcherID = String.valueOf(object);
             } else {
-                tinkerID = null;
+                PatcherID = null;
             }
         } catch (Exception e) {
-            Log.e(TAG, "getManifestTinkerID exception:" + e.getMessage());
+            Log.e(TAG, "getManifestPatcherID exception:" + e.getMessage());
             return null;
         }
-        return tinkerID;
+        return PatcherID;
     }
 
-    public static boolean isTinkerEnabledForDex(int flag) {
+    public static boolean isPatcherEnabledForDex(int flag) {
         return (flag & Constants.PATCHER_DEX_MASK) != 0;
     }
 
-    public static boolean isTinkerEnabledForNativeLib(int flag) {
+    public static boolean isPatcherEnabledForNativeLib(int flag) {
         return (flag & Constants.PATCHER_NATIVE_LIBRARY_MASK) != 0;
     }
 
-    public static boolean isTinkerEnabledForResource(int flag) {
+    public static boolean isPatcherEnabledForResource(int flag) {
         //FIXME:res flag depends dex flag
         return (flag & Constants.PATCHER_RESOURCE_MASK) != 0;
     }
@@ -209,10 +209,10 @@ public class PatcherInternals {
     }
 
     /**
-     * you can set Tinker disable in runtime at some times!
+     * you can set Patcher disable in runtime at some times!
      * @param context
      */
-    public static void setTinkerDisableWithSharedPreferences(Context context) {
+    public static void setPatcherDisableWithSharedPreferences(Context context) {
         SharedPreferences sp = context.getSharedPreferences(Constants.PATCHER_SHARE_PREFERENCE_CONFIG, Context.MODE_MULTI_PROCESS);
         sp.edit().putBoolean(Constants.PATCHER_ENABLE_CONFIG, false).commit();
     }
@@ -222,16 +222,16 @@ public class PatcherInternals {
      * @param context
      * @return
      */
-    public static boolean isTinkerEnableWithSharedPreferences(Context context) {
+    public static boolean isPatcherEnableWithSharedPreferences(Context context) {
         SharedPreferences sp = context.getSharedPreferences(Constants.PATCHER_SHARE_PREFERENCE_CONFIG, Context.MODE_MULTI_PROCESS);
         return sp.getBoolean(Constants.PATCHER_ENABLE_CONFIG, true);
     }
 
-    public static boolean isTinkerEnabled(int flag) {
+    public static boolean isPatcherEnabled(int flag) {
         return (flag != Constants.PATCHER_DISABLE);
     }
 
-    public static boolean isTinkerEnabledAll(int flag) {
+    public static boolean isPatcherEnabledAll(int flag) {
         return (flag == Constants.PATCHER_ENABLE_ALL);
     }
 
