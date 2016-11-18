@@ -196,17 +196,25 @@ public class PatchFileUtil {
             try {
                 dexJar = new ZipFile(file);
                 ZipEntry classesDex = dexJar.getEntry(Constants.DEX_IN_JAR);
-
                 // no code
                 if (null == classesDex) {
+                    Log.e(TAG, "There's no entry named: " + Constants.DEX_IN_JAR + " in " + file.getAbsolutePath());
                     return false;
                 }
                 fileMd5 = getMD5(dexJar.getInputStream(classesDex));
             } catch (IOException e) {
-//                e.printStackTrace();
+                Log.e(TAG, "Bad dex jar file: " + file.getAbsolutePath(), e);
                 return false;
             } finally {
-                PatchFileUtil.closeZip(dexJar);
+                // Bugfix: some device redefined ZipFile, which is not implemented closeable.
+                // PatchFileUtil.closeZip(dexJar);
+                if (dexJar != null) {
+                    try {
+                        dexJar.close();
+                    } catch (Throwable thr) {
+                        // Ignored.
+                    }
+                }
             }
         }
 

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
 
 import java.io.File;
@@ -30,10 +31,29 @@ public class PatcherInternals {
      * or you may just hardcode them in your app
      */
     private static String processName = null;
-    private static String PatcherID = null;
+    private static String patcherID = null;
 
     public static boolean isVmArt() {
-        return VM_IS_ART;
+        return VM_IS_ART || Build.VERSION.SDK_INT >= 21;
+    }
+
+    public static boolean isSystemOTA(String lastFingerPrint) {
+        String currentFingerprint = Build.FINGERPRINT;
+        if (lastFingerPrint == null
+                || lastFingerPrint.equals("")
+                || currentFingerprint == null
+                || currentFingerprint.equals("")) {
+            Log.d(TAG, "fingerprint empty:" + lastFingerPrint + ",current:" + currentFingerprint);
+            return false;
+        } else {
+            if (lastFingerPrint.equals(currentFingerprint)) {
+                Log.d(TAG, "same fingerprint:" + currentFingerprint);
+                return false;
+            } else {
+                Log.d(TAG, "system OTA,fingerprint not equal:" + lastFingerPrint + "," + currentFingerprint);
+                return true;
+            }
+        }
     }
 
     public static boolean isNullOrNil(final String object) {
@@ -46,15 +66,15 @@ public class PatcherInternals {
     /**
      * thinker package check
      * @param context
-     * @param PatcherFlag
+     * @param patcherFlag
      * @param patchFile
      * @param securityCheck
      * @return
      */
-    public static int checkPatcherPackage(Context context, int PatcherFlag, File patchFile, SecurityCheck securityCheck) {
+    public static int checkPatcherPackage(Context context, int patcherFlag, File patchFile, SecurityCheck securityCheck) {
         int returnCode = checkSignatureAndPatcherID(context, patchFile, securityCheck);
         if (returnCode == Constants.ERROR_PACKAGE_CHECK_OK) {
-            returnCode = checkPackageAndPatcherFlag(securityCheck, PatcherFlag);
+            returnCode = checkPackageAndPatcherFlag(securityCheck, patcherFlag);
         }
         return returnCode;
     }
@@ -87,29 +107,30 @@ public class PatcherInternals {
             return Constants.ERROR_PACKAGE_CHECK_PATCH_PATCHER_ID_NOT_FOUND;
         }
         if (!oldPatcherId.equals(patchPatcherId)) {
+            Log.e(TAG, "patcherId is not equal, base is " + oldPatcherId + ", but patch is " + patchPatcherId);
             return Constants.ERROR_PACKAGE_CHECK_PATCHER_ID_NOT_EQUAL;
         }
         return Constants.ERROR_PACKAGE_CHECK_OK;
     }
 
 
-    public static int checkPackageAndPatcherFlag(SecurityCheck securityCheck, int PatcherFlag) {
-        if (isPatcherEnabledAll(PatcherFlag)) {
+    public static int checkPackageAndPatcherFlag(SecurityCheck securityCheck, int patcherFlag) {
+        if (isPatcherEnabledAll(patcherFlag)) {
             return Constants.ERROR_PACKAGE_CHECK_OK;
         }
         HashMap<String, String> metaContentMap = securityCheck.getMetaContentMap();
         //check dex
-        boolean dexEnable = isPatcherEnabledForDex(PatcherFlag);
+        boolean dexEnable = isPatcherEnabledForDex(patcherFlag);
         if (!dexEnable && metaContentMap.containsKey(Constants.DEX_META_FILE)) {
             return Constants.ERROR_PACKAGE_CHECK_PATCHERFLAG_NOT_SUPPORT;
         }
         //check native library
-        boolean nativeEnable = isPatcherEnabledForNativeLib(PatcherFlag);
+        boolean nativeEnable = isPatcherEnabledForNativeLib(patcherFlag);
         if (!nativeEnable && metaContentMap.containsKey(Constants.SO_META_FILE)) {
             return Constants.ERROR_PACKAGE_CHECK_PATCHERFLAG_NOT_SUPPORT;
         }
         //check resource
-        boolean resEnable = isPatcherEnabledForResource(PatcherFlag);
+        boolean resEnable = isPatcherEnabledForResource(patcherFlag);
         if (!resEnable && metaContentMap.containsKey(Constants.RES_META_FILE)) {
             return Constants.ERROR_PACKAGE_CHECK_PATCHERFLAG_NOT_SUPPORT;
         }
@@ -118,7 +139,7 @@ public class PatcherInternals {
     }
 
     /**
-     * not like {@cod ShareSecurityCheck.getPackagePropertiesIfPresent}
+     * not like {@cod SecurityCheck.getPackagePropertiesIfPresent}
      * we don't check Signatures or other files, we just get the package meta's properties directly
      * @param patchFile
      * @return
@@ -153,8 +174,8 @@ public class PatcherInternals {
         }
     }
     public static String getManifestPatcherID(Context context) {
-        if (PatcherID != null) {
-            return PatcherID;
+        if (patcherID != null) {
+            return patcherID;
         }
         try {
             ApplicationInfo appInfo = context.getPackageManager()
@@ -163,15 +184,15 @@ public class PatcherInternals {
 
             Object object = appInfo.metaData.get(Constants.PATCHER_ID);
             if (object != null) {
-                PatcherID = String.valueOf(object);
+                patcherID = String.valueOf(object);
             } else {
-                PatcherID = null;
+                patcherID = null;
             }
         } catch (Exception e) {
             Log.e(TAG, "getManifestPatcherID exception:" + e.getMessage());
             return null;
         }
-        return PatcherID;
+        return patcherID;
     }
 
     public static boolean isPatcherEnabledForDex(int flag) {

@@ -25,7 +25,7 @@ public class PatcherDexLoader {
     private PatcherDexLoader() {
     }
 
-    public static boolean loadPatcherJars(Application application, boolean tinkerLoadVerifyFlag, String directory, Intent intentResult) {
+    public static boolean loadPatcherJars(Application application, boolean tinkerLoadVerifyFlag, String directory, Intent intentResult, boolean isSystemOTA) {
         return false;
     }
 

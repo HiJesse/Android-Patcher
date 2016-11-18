@@ -30,11 +30,11 @@ public class SecurityCheck {
      * static to faster
      * public key
      */
-    private static PublicKey mPublicKey = null;
+    private static       PublicKey mPublicKey = null;
 
-    private final Context mContext;
+    private final Context                 mContext;
     private final HashMap<String, String> metaContentMap;
-    private HashMap<String, String> packageProperties;
+    private       HashMap<String, String> packageProperties;
 
     public SecurityCheck(Context context) {
         mContext = context;
@@ -47,33 +47,6 @@ public class SecurityCheck {
 
     public HashMap<String, String> getMetaContentMap() {
         return metaContentMap;
-    }
-
-    /**
-     * get the base tinkerId
-     *
-     * @return
-     */
-    public String getTinkerID() {
-        if (packageProperties != null) {
-            String tinkerId = packageProperties.get(Constants.PATCHER_ID);
-            return tinkerId;
-        }
-        return null;
-    }
-
-    /**
-     * get the new tinkerId
-     *
-     * @return
-     */
-    public String getNewTinkerID() {
-        if (packageProperties != null) {
-            String tinkerId = packageProperties.get(Constants.NEW_PATCHER_ID);
-
-            return tinkerId;
-        }
-        return null;
     }
 
     /**

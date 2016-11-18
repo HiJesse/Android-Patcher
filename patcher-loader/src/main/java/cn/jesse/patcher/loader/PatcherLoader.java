@@ -192,9 +192,13 @@ public class PatcherLoader extends AbstractPatcherLoader{
             }
         }
 
+        //only work for art platform oat
+        boolean isSystemOTA = PatcherInternals.isVmArt() && PatcherInternals.isSystemOTA(patchInfo.fingerPrint);
+
         //符合条件的话就更新版本,并将最新的patch info更新入文件
         //we should first try rewrite patch info file, if there is a error, we can't load jar
-        if (mainProcess && versionChanged) {
+        if (isSystemOTA
+                || (mainProcess && versionChanged)) {
             patchInfo.oldVersion = version;
             //update old version to new
             if (!PatchInfo.rewritePatchInfoFileWithLock(patchInfoFile, patchInfo, patchInfoLockFile)) {
@@ -214,7 +218,7 @@ public class PatcherLoader extends AbstractPatcherLoader{
 
         //now we can load patch jar
         if (isEnabledForDex) {
-            boolean loadTinkerJars = PatcherDexLoader.loadPatcherJars(app, patchLoadVerifyFlag, patchVersionDirectory, resultIntent);
+            boolean loadTinkerJars = PatcherDexLoader.loadPatcherJars(app, patchLoadVerifyFlag, patchVersionDirectory, resultIntent, isSystemOTA);
             if (!loadTinkerJars) {
                 Log.w(TAG, "tryLoadPatchFiles:onPatchLoadDexesFail");
                 return;

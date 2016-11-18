@@ -25,8 +25,6 @@ public class Constants {
     public static final String SO_META_FILE = "assets/so_meta.txt";
     public static final String SO_PATH      = "lib";
 
-    // If you changed this value, please change the same value in TypedValue, too.
-    public static final String DEX_SMALLPATCH_INFO_FILE = "smallpatch_info.ddextra";
 
     public static final String DEX_META_FILE            = "assets/dex_meta.txt";
     public static final String DEX_PATH                 = "dex";
@@ -36,6 +34,8 @@ public class Constants {
 
     public static final String CHECK_DEX_INSTALL_FAIL = "checkDexInstall failed";
     public static final String CHECK_RES_INSTALL_FAIL = "checkResInstall failed";
+//    public static final String CHECK_VM_PROPERTY_FAIL = "checkVmArtProperty failed";
+
 
     public static final String RES_META_FILE       = "assets/res_meta.txt";
     public static final String RES_ARSC            = "resources.arsc";
@@ -62,13 +62,13 @@ public class Constants {
     /**
      * multi process share
      */
-    public static final String PATCHER_SHARE_PREFERENCE_CONFIG = "PATCHER_share_config";
-    public static final String PATCHER_ENABLE_CONFIG           = "PATCHER_enable";
+    public static final String PATCHER_SHARE_PREFERENCE_CONFIG = "patcher_share_config";
+    public static final String PATCHER_ENABLE_CONFIG           = "patcher_enable";
 
     /**
      * only for each process
      */
-    public static final String PATCHER_OWN_PREFERENCE_CONFIG = "PATCHER_own_config_";
+    public static final String PATCHER_OWN_PREFERENCE_CONFIG = "patcher_own_config_";
     public static final String PATCHER_SAFE_MODE_COUNT       = "safe_mode_count";
     public static final int    PATCHER_SAFE_MODE_MAX_COUNT   = 3;
 
@@ -76,7 +76,7 @@ public class Constants {
     /**
      * notification id, use to Increasing the patch process priority
      * your app shouldn't use the same notification id.
-     * if you want to define it, use {@code PATCHERPatchService.setPATCHERNotificationId}
+     * if you want to define it, use {@code TinkerPatchService.setTinkerNotificationId}
      */
     public static final int PATCHER_PATCH_SERVICE_NOTIFICATION = -1119860829;
 
@@ -109,13 +109,15 @@ public class Constants {
     public static final int ERROR_LOAD_PATCH_INFO_BLANK                           = -5;
     public static final int ERROR_LOAD_PATCH_VERSION_DIRECTORY_NOT_EXIST          = -6;
     public static final int ERROR_LOAD_PATCH_VERSION_FILE_NOT_EXIST               = -7;
-    public static final int ERROR_LOAD_PATCH_PACKAGE_CHECK_FAIL                   = -9;
-    public static final int ERROR_LOAD_PATCH_VERSION_DEX_DIRECTORY_NOT_EXIST      = -10;
-    public static final int ERROR_LOAD_PATCH_VERSION_DEX_FILE_NOT_EXIST           = -11;
-    public static final int ERROR_LOAD_PATCH_VERSION_DEX_OPT_FILE_NOT_EXIST       = -12;
-    public static final int ERROR_LOAD_PATCH_VERSION_DEX_CLASSLOADER_NULL         = -13;
-    public static final int ERROR_LOAD_PATCH_VERSION_DEX_MD5_MISMATCH             = -14;
-    public static final int ERROR_LOAD_PATCH_VERSION_DEX_LOAD_EXCEPTION           = -15;
+    public static final int ERROR_LOAD_PATCH_PACKAGE_CHECK_FAIL                   = -8;
+    public static final int ERROR_LOAD_PATCH_VERSION_DEX_DIRECTORY_NOT_EXIST      = -9;
+    public static final int ERROR_LOAD_PATCH_VERSION_DEX_FILE_NOT_EXIST           = -10;
+    public static final int ERROR_LOAD_PATCH_VERSION_DEX_OPT_FILE_NOT_EXIST       = -11;
+    public static final int ERROR_LOAD_PATCH_VERSION_DEX_CLASSLOADER_NULL         = -12;
+    public static final int ERROR_LOAD_PATCH_VERSION_DEX_MD5_MISMATCH             = -13;
+    public static final int ERROR_LOAD_PATCH_VERSION_DEX_LOAD_EXCEPTION           = -14;
+    public static final int ERROR_LOAD_PATCH_VERSION_PARALLEL_DEX_OPT_EXCEPTION   = -15;
+
     public static final int ERROR_LOAD_PATCH_VERSION_LIB_DIRECTORY_NOT_EXIST      = -16;
     public static final int ERROR_LOAD_PATCH_VERSION_LIB_FILE_NOT_EXIST           = -17;
     public static final int ERROR_LOAD_PATCH_REWRITE_PATCH_INFO_FAIL              = -18;
@@ -135,6 +137,7 @@ public class Constants {
     public static final int ERROR_LOAD_EXCEPTION_DEX      = -2;
     public static final int ERROR_LOAD_EXCEPTION_RESOURCE = -3;
     public static final int ERROR_LOAD_EXCEPTION_UNCAUGHT = -4;
+    public static final int ERROR_LOAD_EXCEPTION_DEX_OPT  = -5;
 
 
     //recover error code

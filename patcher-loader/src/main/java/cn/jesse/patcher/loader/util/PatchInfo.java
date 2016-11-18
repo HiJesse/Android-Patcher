@@ -1,5 +1,6 @@
 package cn.jesse.patcher.loader.util;
 
+import android.os.Build;
 import android.util.Log;
 
 import java.io.File;
@@ -18,14 +19,17 @@ public class PatchInfo {
     public static final int    MAX_EXTRACT_ATTEMPTS = Constants.MAX_EXTRACT_ATTEMPTS;
     public static final String OLD_VERSION          = Constants.OLD_VERSION;
     public static final String NEW_VERSION          = Constants.NEW_VERSION;
+    public static final String FINGER_PRINT         = "print";
     private static final String TAG = Constants.LOADER_TAG + "PatchInfo";
     public String oldVersion;
     public String newVersion;
+    public String fingerPrint;
 
-    public PatchInfo(String oldVer, String newVew) {
+    public PatchInfo(String oldVer, String newVew, String finger) {
         // TODO Auto-generated constructor stub
         this.oldVersion = oldVer;
         this.newVersion = newVew;
+        this.fingerPrint = finger;
     }
 
     public static PatchInfo readAndCheckPropertyWithLock(File pathInfoFile, File lockFile) {
@@ -84,6 +88,7 @@ public class PatchInfo {
         int numAttempts = 0;
         String oldVer = null;
         String newVer = null;
+        String lastFingerPrint = null;
 
         while (numAttempts < MAX_EXTRACT_ATTEMPTS && !isReadPatchSuccessful) {
             numAttempts++;
@@ -94,8 +99,10 @@ public class PatchInfo {
                 properties.load(inputStream);
                 oldVer = properties.getProperty(OLD_VERSION);
                 newVer = properties.getProperty(NEW_VERSION);
+                lastFingerPrint = properties.getProperty(FINGER_PRINT);
             } catch (IOException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
+                Log.e(TAG, "read property failed, e:" + e);
             } finally {
                 PatchFileUtil.closeQuietly(inputStream);
             }
@@ -103,7 +110,7 @@ public class PatchInfo {
             if (oldVer == null || newVer == null) {
                 continue;
             }
-            //oldver may be "" or 32 md5
+            //oldVer may be "" or 32 md5
             if ((!oldVer.equals("") && !PatchFileUtil.checkIfMd5Valid(oldVer)) || !PatchFileUtil.checkIfMd5Valid(newVer)) {
                 Log.w(TAG, "path info file  corrupted:" + pathInfoFile.getAbsolutePath());
                 continue;
@@ -113,7 +120,7 @@ public class PatchInfo {
         }
 
         if (isReadPatchSuccessful) {
-            return new PatchInfo(oldVer, newVer);
+            return new PatchInfo(oldVer, newVer, lastFingerPrint);
         }
 
         return null;
@@ -144,6 +151,8 @@ public class PatchInfo {
             Properties newProperties = new Properties();
             newProperties.put(OLD_VERSION, info.oldVersion);
             newProperties.put(NEW_VERSION, info.newVersion);
+            newProperties.put(FINGER_PRINT, Build.FINGERPRINT);
+
             FileOutputStream outputStream = null;
             try {
                 outputStream = new FileOutputStream(pathInfoFile, false);
