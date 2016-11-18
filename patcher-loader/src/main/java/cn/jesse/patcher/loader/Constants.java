@@ -53,7 +53,7 @@ public class Constants {
     public static final String DEXMODE_JAR = "jar";
     public static final String DEX_IN_JAR  = "classes.dex";
 
-    public static final String PATCH_DIRECTORY_NAME = "PATCHER";
+    public static final String PATCH_DIRECTORY_NAME = "patcher";
     public static final String PATCH_INFO_NAME      = "patch.info";
     public static final String PATCH_INFO_LOCK_NAME = "info.lock";
 

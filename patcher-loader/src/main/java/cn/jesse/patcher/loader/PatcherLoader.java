@@ -63,7 +63,7 @@ public class PatcherLoader extends AbstractPatcherLoader{
             return;
         }
 
-        //tinker/patch.info
+        //patcher/patch.info
         File patchInfoFile = PatchFileUtil.getPatchInfoFile(patchDirectoryPath);
 
         //检查patch info文件是否存在
@@ -72,6 +72,8 @@ public class PatcherLoader extends AbstractPatcherLoader{
             IntentUtil.setIntentReturnCode(resultIntent, Constants.ERROR_LOAD_PATCH_INFO_NOT_EXIST);
             return;
         }
+
+        //patch.info文件中存储了如下新旧两个版本补丁的MD5
         //old = 641e634c5b8f1649c75caf73794acbdf
         //new = 2c150d8560334966952678930ba67fa8
         File patchInfoLockFile = PatchFileUtil.getPatchInfoLockFile(patchDirectoryPath);
@@ -106,7 +108,7 @@ public class PatcherLoader extends AbstractPatcherLoader{
             version = newVersion;
         }
 
-        //检查当前补丁版本是否为空
+        //检查当前补丁版本的MD5标识是否为空
         if (PatcherInternals.isNullOrNil(version)) {
             Log.w(TAG, "tryLoadPatchFiles:version is blank, wait main process to restart");
             IntentUtil.setIntentReturnCode(resultIntent, Constants.ERROR_LOAD_PATCH_INFO_BLANK);
@@ -116,7 +118,7 @@ public class PatcherLoader extends AbstractPatcherLoader{
         //patch-641e634c
         String patchName = PatchFileUtil.getPatchVersionDirectory(version);
 
-        //tinker/patch.info/patch-641e634c
+        //patcher/patch.info/patch-641e634c
         String patchVersionDirectory = patchDirectoryPath + "/" + patchName;
         File patchVersionDirectoryFile = new File(patchVersionDirectory);
 
@@ -128,7 +130,7 @@ public class PatcherLoader extends AbstractPatcherLoader{
             return;
         }
 
-        //tinker/patch.info/patch-641e634c/patch-641e634c.apk
+        //patcher/patch.info/patch-641e634c/patch-641e634c.apk
         File patchVersionFile = new File(patchVersionDirectoryFile.getAbsolutePath(), PatchFileUtil.getPatchVersionFile(version));
 
         //检查补丁文件是否存在
@@ -139,12 +141,12 @@ public class PatcherLoader extends AbstractPatcherLoader{
             return;
         }
 
-        //检查补丁文件签名是否一致
+        //检查补丁文件签名和Patcher id是否一致
         SecurityCheck securityCheck = new SecurityCheck(app);
 
         int returnCode = PatcherInternals.checkPatcherPackage(app, patchFlag, patchVersionFile, securityCheck);
         if (returnCode != Constants.ERROR_PACKAGE_CHECK_OK) {
-            Log.w(TAG, "tryLoadPatchFiles:checkTinkerPackage");
+            Log.w(TAG, "tryLoadPatchFiles:checkPatcherPackage");
             resultIntent.putExtra(IntentUtil.INTENT_PATCH_PACKAGE_PATCH_CHECK, returnCode);
             IntentUtil.setIntentReturnCode(resultIntent, Constants.ERROR_LOAD_PATCH_PACKAGE_CHECK_FAIL);
             return;
@@ -156,7 +158,7 @@ public class PatcherLoader extends AbstractPatcherLoader{
 
         //如果支持dex修复 则继续检查dex补丁文件是否存在
         if (isEnabledForDex) {
-            //tinker/patch.info/patch-641e634c/dex
+            //patcher/patch.info/patch-641e634c/dex
             boolean dexCheck = PatcherDexLoader.checkComplete(patchVersionDirectory, securityCheck, resultIntent);
             if (!dexCheck) {
                 //file not found, do not load patch
@@ -169,7 +171,7 @@ public class PatcherLoader extends AbstractPatcherLoader{
         final boolean isEnabledForNativeLib = PatcherInternals.isPatcherEnabledForNativeLib(patchFlag);
 
         if (isEnabledForNativeLib) {
-            //tinker/patch.info/patch-641e634c/lib
+            //patcher/patch.info/patch-641e634c/lib
             boolean libCheck = PatcherSoLoader.checkComplete(patchVersionDirectory, securityCheck, resultIntent);
             if (!libCheck) {
                 //file not found, do not load patch

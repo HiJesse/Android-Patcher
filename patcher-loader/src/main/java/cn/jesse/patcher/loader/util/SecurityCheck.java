@@ -134,9 +134,11 @@ public class SecurityCheck {
                 }
                 //for faster, only check the meta.txt files
                 //we will check other files's mad5 written in meta files
+                //只校验meta.txt结尾的文件的签名
                 if (!name.endsWith(Constants.META_SUFFIX)) {
                     continue;
                 }
+                //将meta.txt文件内容存入内存,供外部验证或加载.
                 metaContentMap.put(name, PatchFileUtil.loadDigestes(jarFile, jarEntry));
                 Certificate[] certs = jarEntry.getCertificates();
                 if (certs == null) {
