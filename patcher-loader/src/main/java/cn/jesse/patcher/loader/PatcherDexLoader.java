@@ -108,7 +108,18 @@ public class PatcherDexLoader {
             }
         }
 
-        return false;
+        try {
+            SystemClassLoaderAdder.installDexes(application, classLoader, optimizeDir, legalFiles);
+        } catch (Throwable e) {
+            Log.e(TAG, "install dexes failed");
+//            e.printStackTrace();
+            intentResult.putExtra(IntentUtil.INTENT_PATCH_EXCEPTION, e);
+            IntentUtil.setIntentReturnCode(intentResult, Constants.ERROR_LOAD_PATCH_VERSION_DEX_LOAD_EXCEPTION);
+            return false;
+        }
+        Log.i(TAG, "after loaded classloader: " + application.getClassLoader().toString());
+
+        return true;
     }
 
     /**

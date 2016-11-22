@@ -98,14 +98,19 @@ public class ReflectUtil {
             throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         Field jlrField = findField(instance, fieldName);
 
+        //拿到fieldName对应的数组
         Object[] original = (Object[]) jlrField.get(instance);
+        //根据原数组original的类型大小和要插入的数组extraElements的大小重新创建出一个新的数组combined
         Object[] combined = (Object[]) Array.newInstance(original.getClass().getComponentType(), original.length + extraElements.length);
 
         // NOTE: changed to copy extraElements first, for patch load first
 
+        //将要插入的extraElements数组copy到新数组combined的头部
         System.arraycopy(extraElements, 0, combined, 0, extraElements.length);
+        //再将原数组original copy到combined中extraElements的后面
         System.arraycopy(original, 0, combined, extraElements.length, original.length);
 
+        //最终将扩展过的新数组combined赋值给fileName对应的属性
         jlrField.set(instance, combined);
     }
 
