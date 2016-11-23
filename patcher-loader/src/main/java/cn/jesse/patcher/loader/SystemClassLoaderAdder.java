@@ -26,7 +26,7 @@ import dalvik.system.PathClassLoader;
 public class SystemClassLoaderAdder {
     private static final String TAG = Constants.LOADER_TAG + "ClassLoaderAdd";
 
-    private static final String CHECK_DEX_CLASS = "com.tencent.tinker.loader.TinkerTestDexLoad";
+    private static final String CHECK_DEX_CLASS = "cn.jesse.patcher.loader.PatcherTestDexLoad";
     private static final String CHECK_DEX_FIELD = "isPatch";
 
     private static int sPatchDexCount = 0;
