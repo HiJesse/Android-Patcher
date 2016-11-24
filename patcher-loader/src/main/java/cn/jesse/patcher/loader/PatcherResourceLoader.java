@@ -35,11 +35,14 @@ public class PatcherResourceLoader {
      * @return boolean
      */
     public static boolean checkComplete(Context context, String directory, SecurityCheck securityCheck, Intent intentResult) {
+        //从SecurityCheck中拿到补丁包中res_meta.txt的信息
         String meta = securityCheck.getMetaContentMap().get(RESOURCE_META_FILE);
         //not found resource
         if (meta == null) {
             return true;
         }
+
+        //将meta中第一行中的MD5数据读取出来,并校验MD5本身是否有问题
         //only parse first line for faster
         ResPatchInfo.parseResPatchInfoFirstLine(meta, resPatchInfo);
 
@@ -51,6 +54,8 @@ public class PatcherResourceLoader {
             IntentUtil.setIntentReturnCode(intentResult, Constants.ERROR_LOAD_PATCH_PACKAGE_CHECK_FAIL);
             return false;
         }
+
+        //校验合成资源补丁的路径和文件是否存在.
         String resourcePath = directory + "/" + RESOURCE_PATH + "/";
 
         File resourceDir = new File(resourcePath);
@@ -65,8 +70,10 @@ public class PatcherResourceLoader {
             IntentUtil.setIntentReturnCode(intentResult, Constants.ERROR_LOAD_PATCH_VERSION_RESOURCE_FILE_NOT_EXIST);
             return false;
         }
+
+        //校验当前的环境是否可以做资源更新,并且为补丁的加载做预热
         try {
-//            ResLoader.isResourceCanPatch(context);
+            ResLoader.isResourceCanPatch(context);
         } catch (Throwable e) {
             Log.e(TAG, "resource hook check failed.", e);
             intentResult.putExtra(IntentUtil.INTENT_PATCH_EXCEPTION, e);
