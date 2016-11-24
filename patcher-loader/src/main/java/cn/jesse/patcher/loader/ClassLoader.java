@@ -23,7 +23,7 @@ import dalvik.system.PathClassLoader;
 /**
  * Created by jesse on 21/11/2016.
  */
-public class SystemClassLoaderAdder {
+public class ClassLoader {
     private static final String TAG = Constants.LOADER_TAG + "ClassLoaderAdd";
 
     private static final String CHECK_DEX_CLASS = "cn.jesse.patcher.loader.PatcherTestDexLoad";
@@ -36,7 +36,7 @@ public class SystemClassLoaderAdder {
             throws Throwable {
 
         if (!files.isEmpty()) {
-            ClassLoader classLoader = loader;
+            java.lang.ClassLoader classLoader = loader;
             if (Build.VERSION.SDK_INT >= 24) {
                 classLoader = AndroidNClassLoader.inject(loader, application);
             }
@@ -56,13 +56,13 @@ public class SystemClassLoaderAdder {
 
             if (!checkDexInstall(classLoader)) {
                 //reset patch dex
-                SystemClassLoaderAdder.uninstallPatchDex(classLoader);
+                ClassLoader.uninstallPatchDex(classLoader);
                 throw new PatcherRuntimeException(Constants.CHECK_DEX_INSTALL_FAIL);
             }
         }
     }
 
-    public static void uninstallPatchDex(ClassLoader classLoader) throws Throwable {
+    public static void uninstallPatchDex(java.lang.ClassLoader classLoader) throws Throwable {
         if (sPatchDexCount <= 0) {
             return;
         }
@@ -81,7 +81,7 @@ public class SystemClassLoaderAdder {
         }
     }
 
-    private static boolean checkDexInstall(ClassLoader classLoader) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+    private static boolean checkDexInstall(java.lang.ClassLoader classLoader) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         Class<?> clazz = Class.forName(CHECK_DEX_CLASS, true, classLoader);
         Field filed = ReflectUtil.findField(clazz, CHECK_DEX_FIELD);
         boolean isPatch = (boolean) filed.get(null);
@@ -94,7 +94,7 @@ public class SystemClassLoaderAdder {
      */
     private static final class V23 {
 
-        private static void install(ClassLoader loader, List<File> additionalClassPathEntries,
+        private static void install(java.lang.ClassLoader loader, List<File> additionalClassPathEntries,
                                     File optimizedDirectory)
                 throws IllegalArgumentException, IllegalAccessException,
                 NoSuchFieldException, InvocationTargetException, NoSuchMethodException, IOException {
@@ -156,7 +156,7 @@ public class SystemClassLoaderAdder {
      */
     private static final class V19 {
 
-        private static void install(ClassLoader loader, List<File> additionalClassPathEntries,
+        private static void install(java.lang.ClassLoader loader, List<File> additionalClassPathEntries,
                                     File optimizedDirectory)
                 throws IllegalArgumentException, IllegalAccessException,
                 NoSuchFieldException, InvocationTargetException, NoSuchMethodException, IOException {
@@ -212,7 +212,7 @@ public class SystemClassLoaderAdder {
      */
     private static final class V14 {
 
-        private static void install(ClassLoader loader, List<File> additionalClassPathEntries,
+        private static void install(java.lang.ClassLoader loader, List<File> additionalClassPathEntries,
                                     File optimizedDirectory)
                 throws IllegalArgumentException, IllegalAccessException,
                 NoSuchFieldException, InvocationTargetException, NoSuchMethodException {
@@ -249,7 +249,7 @@ public class SystemClassLoaderAdder {
      * Installer for platform versions 4 to 13.
      */
     private static final class V4 {
-        private static void install(ClassLoader loader, List<File> additionalClassPathEntries, File optimizedDirectory)
+        private static void install(java.lang.ClassLoader loader, List<File> additionalClassPathEntries, File optimizedDirectory)
                 throws IllegalArgumentException, IllegalAccessException,
                 NoSuchFieldException, IOException {
             /* The patched class loader is expected to be a descendant of
