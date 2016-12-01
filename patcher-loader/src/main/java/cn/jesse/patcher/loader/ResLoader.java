@@ -4,12 +4,16 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.util.ArrayMap;
+import android.util.Log;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
+
+import cn.jesse.patcher.loader.util.ReflectUtil;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.KITKAT;
@@ -36,6 +40,7 @@ public class ResLoader {
         //   - Replace mResDir to point to the external resource file instead of the .apk. This is
         //     used as the asset path for new Resources objects.
         //   - Set Application#mLoadedApk to the found LoadedApk instance
+        // 校验当前系统环境是否支持资源补丁的加载, 并保存下来加载补丁所需的Field和Method, 为资源补丁加载预热
 
         // Find the ActivityThread instance for the current thread
         Class<?> activityThread = Class.forName("android.app.ActivityThread");
@@ -152,9 +157,88 @@ public class ResLoader {
             assetsFiled.setAccessible(true);
         } catch (Throwable ignore) {
             // N moved the mAssets inside an mResourcesImpl field
+            // N 开始Android源码中又抽出了一个ResourcesImpl类, 这个类中持有AssetManager
             resourcesImplFiled = Resources.class.getDeclaredField("mResourcesImpl");
             resourcesImplFiled.setAccessible(true);
         }
+    }
+
+    public static void monkeyPatchExistingResources(Context context, String externalResourceFile) throws Throwable {
+        if (externalResourceFile == null) {
+            return;
+        }
+        // Find the ActivityThread instance for the current thread
+        // 拿到当前主线程的ActivityThread对象
+        Class<?> activityThread = Class.forName("android.app.ActivityThread");
+        Object currentActivityThread = getActivityThread(context, activityThread);
+
+        // 遍历ActivityThread对象中两个持有LoadedApk容器的对象
+        for (Field field : new Field[]{packagesFiled, resourcePackagesFiled}) {
+            Object value = field.get(currentActivityThread);
+
+            // 遍历容器中的每一个LoadedApk对象 并将mResDir属性的值替换成资源补丁包的路径.
+            for (Map.Entry<String, WeakReference<?>> entry
+                    : ((Map<String, WeakReference<?>>) value).entrySet()) {
+                Object loadedApk = entry.getValue().get();
+                if (loadedApk == null) {
+                    continue;
+                }
+                if (externalResourceFile != null) {
+                    resDir.set(loadedApk, externalResourceFile);
+                }
+            }
+        }
+        // Create a new AssetManager instance and point it to the resources installed under
+        // /sdcard
+        // 将补丁包中的资源load进新的AssetManager中.
+        if (((Integer) addAssetPathMethod.invoke(newAssetManager, externalResourceFile)) == 0) {
+            throw new IllegalStateException("Could not create new AssetManager");
+        }
+
+        // Kitkat needs this method call, Lollipop doesn't. However, it doesn't seem to cause any harm
+        // in L, so we do it unconditionally.
+        ensureStringBlocksMethod.invoke(newAssetManager);
+
+        // 遍历Resources容器, 将每个Resources对象中引用的AssetManager替换成加载过补丁资源的新的AssetManager对象.
+        for (WeakReference<Resources> wr : references) {
+            Resources resources = wr.get();
+            //pre-N
+            if (resources != null) {
+                // Set the AssetManager of the Resources instance to our brand new one
+                try {
+                    assetsFiled.set(resources, newAssetManager);
+                } catch (Throwable ignore) {
+                    // N
+                    // N 中先从ResourcesImpl对象中获取AssetManager对象再替换
+                    Object resourceImpl = resourcesImplFiled.get(resources);
+                    // for Huawei HwResourcesImpl
+                    Field implAssets = ReflectUtil.findField(resourceImpl, "mAssets");
+                    implAssets.setAccessible(true);
+                    implAssets.set(resourceImpl, newAssetManager);
+                }
+
+                resources.updateConfiguration(resources.getConfiguration(), resources.getDisplayMetrics());
+            }
+        }
+
+        if (!checkResUpdate(context)) {
+            throw new PatcherRuntimeException(Constants.CHECK_RES_INSTALL_FAIL);
+        }
+    }
+
+    /**
+     * 从asset目录下读取一个测试文件, 该测试文件在生成资源补丁的时候自动打入到asset下
+     * 如果打开失败说明资源补丁没有加载成功
+     */
+    private static boolean checkResUpdate(Context context) {
+        try {
+            Log.e(TAG, "checkResUpdate success, found test resource assets file " + TEST_ASSETS_VALUE);
+            context.getAssets().open(TEST_ASSETS_VALUE);
+        } catch (Throwable e) {
+            Log.e(TAG, "checkResUpdate failed, can't find test resource assets file " + TEST_ASSETS_VALUE + " e:" + e.getMessage());
+            return false;
+        }
+        return true;
     }
 
     private static Object getActivityThread(Context context,

@@ -90,7 +90,7 @@ class AndroidNClassLoader extends PathClassLoader {
         return classLoader;
     }
 
-//    public static String getLdLibraryPath(ClassLoader loader) throws Exception {
+//    public static String getLdLibraryPath(DexLoader loader) throws Exception {
 //        String nativeLibraryPath;
 //
 //        nativeLibraryPath = (String) loader.getClass()

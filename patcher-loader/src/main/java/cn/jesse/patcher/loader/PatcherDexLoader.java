@@ -109,7 +109,7 @@ public class PatcherDexLoader {
         }
 
         try {
-            ClassLoader.installDexes(application, classLoader, optimizeDir, legalFiles);
+            DexLoader.installDexes(application, classLoader, optimizeDir, legalFiles);
         } catch (Throwable e) {
             Log.e(TAG, "install dexes failed");
 //            e.printStackTrace();

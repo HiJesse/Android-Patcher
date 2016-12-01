@@ -7,6 +7,7 @@ import android.util.Log;
 import java.io.File;
 
 import cn.jesse.patcher.loader.util.IntentUtil;
+import cn.jesse.patcher.loader.util.PatchFileUtil;
 import cn.jesse.patcher.loader.util.ResPatchInfo;
 import cn.jesse.patcher.loader.util.SecurityCheck;
 
@@ -24,7 +25,44 @@ public class PatcherResourceLoader {
      * Load tinker resources
      */
     public static boolean loadPatcherResources(Context context, boolean patcherLoadVerifyFlag, String directory, Intent intentResult) {
-        return false;
+        // 没有资源补丁
+        if (resPatchInfo == null || resPatchInfo.resArscMd5 == null) {
+            return true;
+        }
+
+        //拼装资源补丁的路径, 并统计资源加载的耗时
+        String resourceString = directory + "/" + RESOURCE_PATH +  "/" + RESOURCE_FILE;
+        File resourceFile = new File(resourceString);
+        long start = System.currentTimeMillis();
+
+        // 如果开启了补丁合法性校验, 则校验补丁文件的MD5.同Dex补丁的校验流程.
+        if (patcherLoadVerifyFlag) {
+            if (!PatchFileUtil.checkResourceArscMd5(resourceFile, resPatchInfo.resArscMd5)) {
+                Log.e(TAG, "Failed to load resource file, path: " + resourceFile.getPath() + ", expect md5: " + resPatchInfo.resArscMd5);
+                IntentUtil.setIntentReturnCode(intentResult, Constants.ERROR_LOAD_PATCH_VERSION_RESOURCE_MD5_MISMATCH);
+                return false;
+            }
+            Log.i(TAG, "verify resource file:" + resourceFile.getPath() + " md5, use time: " + (System.currentTimeMillis() - start));
+        }
+
+        // 加载资源补丁, 如有问题则卸载当前补丁.
+        try {
+            ResLoader.monkeyPatchExistingResources(context, resourceString);
+            Log.i(TAG, "monkeyPatchExistingResources resource file:" + resourceString + ", use time: " + (System.currentTimeMillis() - start));
+        } catch (Throwable e) {
+            Log.e(TAG, "install resources failed");
+            //remove patch dex if resource is installed failed
+            try {
+                DexLoader.uninstallPatchDex(context.getClassLoader());
+            } catch (Throwable throwable) {
+                Log.e(TAG, "uninstallPatchDex failed", e);
+            }
+            intentResult.putExtra(IntentUtil.INTENT_PATCH_EXCEPTION, e);
+            IntentUtil.setIntentReturnCode(intentResult, Constants.ERROR_LOAD_PATCH_VERSION_RESOURCE_LOAD_EXCEPTION);
+            return false;
+        }
+
+        return true;
     }
 
     /**

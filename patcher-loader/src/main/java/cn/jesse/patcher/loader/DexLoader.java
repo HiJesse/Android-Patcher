@@ -23,7 +23,7 @@ import dalvik.system.PathClassLoader;
 /**
  * Created by jesse on 21/11/2016.
  */
-public class ClassLoader {
+public class DexLoader {
     private static final String TAG = Constants.LOADER_TAG + "ClassLoaderAdd";
 
     private static final String CHECK_DEX_CLASS = "cn.jesse.patcher.loader.PatcherTestDexLoad";
@@ -36,7 +36,7 @@ public class ClassLoader {
             throws Throwable {
 
         if (!files.isEmpty()) {
-            java.lang.ClassLoader classLoader = loader;
+            ClassLoader classLoader = loader;
             if (Build.VERSION.SDK_INT >= 24) {
                 classLoader = AndroidNClassLoader.inject(loader, application);
             }
@@ -56,7 +56,7 @@ public class ClassLoader {
 
             if (!checkDexInstall(classLoader)) {
                 //reset patch dex
-                ClassLoader.uninstallPatchDex(classLoader);
+                DexLoader.uninstallPatchDex(classLoader);
                 throw new PatcherRuntimeException(Constants.CHECK_DEX_INSTALL_FAIL);
             }
         }
