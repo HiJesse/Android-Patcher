@@ -7,8 +7,6 @@
 /captures
 /.idea
 /build
-patcher-anno/build
-patcher-loader/build
 gradle.properties
 
 #Eclipse

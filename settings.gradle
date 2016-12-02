@@ -1,1 +1,1 @@
-include ':sample', ':patcher-anno', ':patcher-loader'
+include ':sample', ':patcher-anno', ':patcher-loader', ':patcher-lib'
