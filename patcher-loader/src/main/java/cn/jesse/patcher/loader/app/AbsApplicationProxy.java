@@ -68,7 +68,7 @@ public abstract class AbsApplicationProxy implements ApplicationProxy {
         return patchFlags;
     }
 
-    public boolean isPatchLoadVerifyFlag() {
+    public boolean getPatchLoadVerifyFlag() {
         return patchLoadVerifyFlag;
     }
 
