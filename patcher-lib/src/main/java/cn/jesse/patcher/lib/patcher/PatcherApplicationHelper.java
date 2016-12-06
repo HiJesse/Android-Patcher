@@ -280,11 +280,13 @@ public class PatcherApplicationHelper {
      * @throws UnsatisfiedLinkError
      */
     public static boolean loadLibraryFromPatcher(AbsApplicationProxy applicationProxy, String relativePath, String libname) throws UnsatisfiedLinkError {
+        // 确保加载的SO名字合法
         libname = libname.startsWith("lib") ? libname : "lib" + libname;
         libname = libname.endsWith(".so") ? libname : libname + ".so";
         String relativeLibPath = relativePath + "/" + libname;
 
         //TODO we should add cpu abi, and the real path later
+        // 支持加载SO补丁并且 tryLoadPatchFilesInternal已经成功
         if (PatcherApplicationHelper.isPatcherEnableForNativeLib(applicationProxy)
                 && PatcherApplicationHelper.isPatcherLoadSuccess(applicationProxy)) {
             HashMap<String, String> loadLibraries = PatcherApplicationHelper.getLoadLibraryAndMd5(applicationProxy);

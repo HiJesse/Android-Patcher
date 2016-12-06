@@ -27,24 +27,30 @@ public class PatcherInstaller {
     public static boolean loadLibraryFromPatcher(Context context, String relativePath, String libname) throws UnsatisfiedLinkError {
         final Patcher patcher = Patcher.with(context);
 
+        // 确保加载的SO名字合法
         libname = libname.startsWith("lib") ? libname : "lib" + libname;
         libname = libname.endsWith(".so") ? libname : libname + ".so";
         String relativeLibPath = relativePath + "/" + libname;
 
         //TODO we should add cpu abi, and the real path later
+        // 支持加载SO补丁并且 tryLoadPatchFilesInternal已经成功
         if (patcher.isEnabledForNativeLib() && patcher.isPatcherLoaded()) {
             PatcherLoadResult loadResult = patcher.getPatcherLoadResultIfPresent();
+            // 补丁路径下有释放出来的SO
             if (loadResult.libs != null) {
+                // 遍历找到补丁中跟要加载的SO相匹配的补丁文件
                 for (String name : loadResult.libs.keySet()) {
                     if (name.equals(relativeLibPath)) {
                         String patchLibraryPath = loadResult.libraryDirectory + "/" + name;
                         File library = new File(patchLibraryPath);
                         if (library.exists()) {
                             //whether we check md5 when load
+                            // 是否校验SO补丁的MD5, 没问题了就直接load补丁SO
                             boolean verifyMd5 = patcher.isPatcherLoadVerify();
                             if (verifyMd5 && !PatchFileUtil.verifyFileMd5(library, loadResult.libs.get(name))) {
                                 patcher.getLoadReporter().onLoadFileMd5Mismatch(library, Constants.TYPE_LIBRARY);
                             } else {
+                                // 这里可以区分系统环境的abi 按需加载,或者也可以默认加载armeabi放弃一些性能优化
                                 System.load(patchLibraryPath);
                                 PatcherLog.i(TAG, "loadLibraryFromPatcher success:" + patchLibraryPath);
                                 return true;
