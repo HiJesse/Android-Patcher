@@ -42,4 +42,9 @@ public class ApplicationProxy extends DefaultApplicationProxy{
     public void onCreate() {
         Log.d(TAG, "onCreate");
     }
+
+    static {
+        Log.d("ApplicationProxy", "static");
+        Log.d("ApplicationProxy", System.getProperty("java.library.path"));
+    }
 }
