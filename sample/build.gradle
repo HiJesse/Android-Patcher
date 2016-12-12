@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'patcher'
 
 android {
     compileSdkVersion 23
@@ -22,6 +23,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+}
+
+patcher {
+    sourceApk 'test.apk'
+    ignoreWarning true
+    useSign true
 }
 
 dependencies {
