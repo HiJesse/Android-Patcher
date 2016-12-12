@@ -1,1 +1,6 @@
-include ':sample', ':patcher-anno', ':patcher-loader', ':patcher-lib'
+include ':sample',
+        ':patcher-anno',
+        ':patcher-loader',
+        ':patcher-lib',
+
+        ':patcher-build:patch-gradle-plugin'
