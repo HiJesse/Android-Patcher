@@ -1,4 +1,7 @@
+package cn.jesse.patcher.build.gradle
+
 import cn.jesse.patcher.build.gradle.extension.PatcherExtension
+import cn.jesse.patcher.build.gradle.task.PatcherTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 

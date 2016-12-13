@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'patcher'
+//apply plugin: 'patcher'
 
 android {
     compileSdkVersion 23
@@ -25,11 +25,11 @@ android {
     }
 }
 
-patcher {
-    sourceApk 'test.apk'
-    ignoreWarning true
-    useSign true
-}
+//patcher {
+//    sourceApk 'test.apk'
+//    ignoreWarning true
+//    useSign true
+//}
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
