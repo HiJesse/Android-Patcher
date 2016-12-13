@@ -13,5 +13,10 @@ public class PatcherTask extends DefaultTask {
     @TaskAction
     public void test() {
         println(project.patcher.toString());
+        println(project.patcher.buildConfig.toString());
+        println(project.patcher.dex.toString());
+        println(project.patcher.lib.toString());
+        println(project.patcher.res.toString());
+        println(project.patcher.sevenZip.toString())
     }
 }
