@@ -3,4 +3,5 @@ include ':sample',
         ':patcher-loader',
         ':patcher-lib',
 
+        ':patcher-build:patch-lib',
         ':patcher-build:patch-gradle-plugin'
