@@ -218,8 +218,8 @@ public class PatcherLoader extends AbstractPatcherLoader{
 
         //now we can load patch jar
         if (isEnabledForDex) {
-            boolean loadTinkerJars = PatcherDexLoader.loadPatcherJars(app, patchLoadVerifyFlag, patchVersionDirectory, resultIntent, isSystemOTA);
-            if (!loadTinkerJars) {
+            boolean loadPatcherJars = PatcherDexLoader.loadPatcherJars(app, patchLoadVerifyFlag, patchVersionDirectory, resultIntent, isSystemOTA);
+            if (!loadPatcherJars) {
                 Log.w(TAG, "tryLoadPatchFiles:onPatchLoadDexesFail");
                 return;
             }
@@ -227,8 +227,8 @@ public class PatcherLoader extends AbstractPatcherLoader{
 
         //now we can load patch resource
         if (isEnabledForResource) {
-            boolean loadTinkerResources = PatcherResourceLoader.loadPatcherResources(app, patchLoadVerifyFlag, patchVersionDirectory, resultIntent);
-            if (!loadTinkerResources) {
+            boolean loadPatcherResources = PatcherResourceLoader.loadPatcherResources(app, patchLoadVerifyFlag, patchVersionDirectory, resultIntent);
+            if (!loadPatcherResources) {
                 Log.w(TAG, "tryLoadPatchFiles:onPatchLoadResourcesFail");
                 return;
             }

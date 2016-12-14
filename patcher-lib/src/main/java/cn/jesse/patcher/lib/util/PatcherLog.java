@@ -7,7 +7,7 @@ import cn.jesse.patcher.loader.Constants;
  */
 
 public class PatcherLog {
-    private static final String TAG = Constants.LOADER_TAG + "TinkerLog";
+    private static final String TAG = Constants.LOADER_TAG + "PatcherLog";
     private static PatcherLogImp debugLog = new PatcherLogImp() {
 
         @Override
@@ -53,7 +53,7 @@ public class PatcherLog {
     };
     private static PatcherLogImp patcherLogImp = debugLog;
 
-    public static void setTinkerLogImp(PatcherLogImp imp) {
+    public static void setPatcherLogImp(PatcherLogImp imp) {
         patcherLogImp = imp;
     }
 

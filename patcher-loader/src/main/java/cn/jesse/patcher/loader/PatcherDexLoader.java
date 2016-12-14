@@ -32,7 +32,7 @@ public class PatcherDexLoader {
     private PatcherDexLoader() {
     }
 
-    public static boolean loadPatcherJars(Application application, boolean tinkerLoadVerifyFlag, String directory, Intent intentResult, boolean isSystemOTA) {
+    public static boolean loadPatcherJars(Application application, boolean patcherLoadVerifyFlag, String directory, Intent intentResult, boolean isSystemOTA) {
         //先判断checkComplete时过滤出来物理存在的dexList是否为空
         if (dexList.isEmpty()) {
             Log.w(TAG, "there is no dex to load");
@@ -51,8 +51,8 @@ public class PatcherDexLoader {
 
         String dexPath = directory + "/" + DEX_PATH + "/";
         File optimizeDir = new File(directory + "/" + DEX_OPTIMIZE_PATH);
-//        Log.i(TAG, "loadTinkerJars: dex path: " + dexPath);
-//        Log.i(TAG, "loadTinkerJars: opt path: " + optimizeDir.getAbsolutePath());
+//        Log.i(TAG, "loadPatcherJars: dex path: " + dexPath);
+//        Log.i(TAG, "loadPatcherJars: opt path: " + optimizeDir.getAbsolutePath());
 
         ArrayList<File> legalFiles = new ArrayList<>();
 
@@ -65,8 +65,8 @@ public class PatcherDexLoader {
             String path = dexPath + info.realName;
             File file = new File(path);
 
-            //如果在Application处配置了tinkerLoadVerifyFlag为true, 则每次加载dex补丁之前都对文件做MD5校验.
-            if (tinkerLoadVerifyFlag) {
+            //如果在Application处配置了patcherLoadVerifyFlag为true, 则每次加载dex补丁之前都对文件做MD5校验.
+            if (patcherLoadVerifyFlag) {
                 long start = System.currentTimeMillis();
                 String checkMd5 = isArtPlatForm ? info.destMd5InArt : info.destMd5InDvm;
                 if (!PatchFileUtil.verifyDexFileMd5(file, checkMd5)) {
@@ -157,7 +157,7 @@ public class PatcherDexLoader {
             dexes.put(info.realName, info.destMd5InDvm);
         }
 
-        //tinker/patch.info/patch-641e634c/dex
+        //patcher/patch.info/patch-641e634c/dex
         String dexDirectory = directory + "/" + DEX_PATH + "/";
 
         File dexDir = new File(dexDirectory);

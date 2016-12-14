@@ -195,7 +195,7 @@ public class DexLoader {
             } catch (NoSuchMethodException e) {
                 Log.e(TAG, "NoSuchMethodException: makeDexElements(ArrayList,File,ArrayList) failure");
                 try {
-                    //Android 4.4 5.0 5.1 参数都是ArrayList,但是Tinker在线上有碰到机子方法参数是List
+                    //Android 4.4 5.0 5.1 参数都是ArrayList,但是在线上有碰到机子方法参数是List
                     makeDexElements = ReflectUtil.findMethod(dexPathList, "makeDexElements", List.class, File.class, List.class);
                 } catch (NoSuchMethodException e1) {
                     Log.e(TAG, "NoSuchMethodException: makeDexElements(List,File,List) failure");

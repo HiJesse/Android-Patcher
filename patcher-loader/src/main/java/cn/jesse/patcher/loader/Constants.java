@@ -76,7 +76,6 @@ public class Constants {
     /**
      * notification id, use to Increasing the patch process priority
      * your app shouldn't use the same notification id.
-     * if you want to define it, use {@code TinkerPatchService.setTinkerNotificationId}
      */
     public static final int PATCHER_PATCH_SERVICE_NOTIFICATION = -1119860829;
 

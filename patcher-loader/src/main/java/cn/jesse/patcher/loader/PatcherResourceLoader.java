@@ -22,7 +22,7 @@ public class PatcherResourceLoader {
     private static ResPatchInfo resPatchInfo = new ResPatchInfo();
 
     /**
-     * Load tinker resources
+     * Load patcher resources
      */
     public static boolean loadPatcherResources(Context context, boolean patcherLoadVerifyFlag, String directory, Intent intentResult) {
         // 没有资源补丁
