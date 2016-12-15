@@ -6,6 +6,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.2.0'
+        classpath fileTree(dir: 'patcher-build/patch-lib/build/libs', include: ['*.jar'])
         classpath fileTree(dir: 'patcher-build/patch-gradle-plugin/build/libs', include: ['*.jar'])
     }
 }

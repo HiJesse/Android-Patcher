@@ -12,6 +12,7 @@ import cn.jesse.patcher.build.util.FileOperation
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.UnknownTaskException
 
 /**
  * Created by jesse on 12/12/2016.
@@ -61,7 +62,8 @@ public class PatcherPlugin implements Plugin<Project> {
 //        android.registerTransform(new AuxiliaryInjectTransform(project))
 
 
-        final def evaluate = project.afterEvaluate() {
+        // 修改声明 配属属性
+        project.afterEvaluate() {
             project.logger.error("------------------------------------ patcher build warning ------------------------------------")
             project.logger.error("patcher auto operation: ")
             project.logger.error("excluding annotation processor and source template from app packaging.")
@@ -73,10 +75,10 @@ public class PatcherPlugin implements Plugin<Project> {
             project.logger.error("")
             project.logger.error("if minifyEnabled is true")
 
-//            String tempMappingPath = configuration.buildConfig.applyMapping
-//            if (FileOperation.isLegalFile(tempMappingPath)) {
-//                project.logger.error("we will build ${project.getName()} apk with apply mapping file ${tempMappingPath}")
-//            }
+            String tempMappingPath = configuration.buildConfig.applyMapping
+            if (FileOperation.isLegalFile(tempMappingPath)) {
+                project.logger.error("we will build ${project.getName()} apk with apply mapping file ${tempMappingPath}")
+            }
 
 //            project.logger.error("you will find the gen proguard rule file at ${TinkerProguardConfigTask.PROGUARD_CONFIG_PATH}")
             project.logger.error("and we will help you to put it in the proguardFiles.")
@@ -87,15 +89,37 @@ public class PatcherPlugin implements Plugin<Project> {
             project.logger.error("")
             project.logger.error("if applyResourceMapping file is exist")
             String tempResourceMappingPath = configuration.buildConfig.applyResourceMapping
-//            if (FileOperation.isLegalFile(tempResourceMappingPath)) {
-//                project.logger.error("we will build ${project.getName()} apk with resource R.txt ${tempResourceMappingPath} file")
-//            } else {
-//                project.logger.error("we will build ${project.getName()} apk with resource R.txt file")
-//            }
+            if (FileOperation.isLegalFile(tempResourceMappingPath)) {
+                project.logger.error("we will build ${project.getName()} apk with resource R.txt ${tempResourceMappingPath} file")
+            } else {
+                project.logger.error("we will build ${project.getName()} apk with resource R.txt file")
+            }
             project.logger.error("if resources.arsc has changed, you should use applyResource mode to build the new apk!")
             project.logger.error("-----------------------------------------------------------------------------------------------")
         }
-        evaluate
+
+        // 遍历所有的variant
+        android.applicationVariants.all { variant ->
+
+            def variantOutput = variant.outputs.first()
+            def variantName = variant.name.capitalize()
+
+            // 禁止使用 instant run 避免对补丁生成产生影响
+            try {
+                def instantRunTask = project.tasks.getByName("transformClassesWithInstantRunFor${variantName}")
+                if (instantRunTask) {
+                    throw new GradleException(
+                            "Tinker does not support instant run mode, please trigger build"
+                                    + " by assemble${variantName} or disable instant run"
+                                    + " in 'File->Settings...'."
+                    )
+                }
+            } catch (UnknownTaskException e) {
+                // Not in instant run mode, continue.
+            }
+
+        }
+
 
         project.tasks.create("patcherTest", PatcherTask)
     }
