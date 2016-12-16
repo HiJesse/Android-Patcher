@@ -45,6 +45,9 @@ public class PatcherDexExtension {
         loader = []
     }
 
+    /**
+     * dexMode 是有两个模式 raw jar
+     */
     void checkDexMode() {
         if (!dexMode.equals("raw") && !dexMode.equals("jar")) {
             throw new GradleException("dexMode can be only one of 'jar' or 'raw'!")

@@ -33,6 +33,7 @@ public class PatcherSevenZipExtension {
         this.project = project
     }
 
+    // 从远程仓库拉下来zip
     void resolveZipFinalPath() {
         if (path != null)
             return

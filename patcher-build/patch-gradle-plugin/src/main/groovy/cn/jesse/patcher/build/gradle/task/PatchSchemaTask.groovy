@@ -26,6 +26,17 @@ public class PatchSchemaTask extends DefaultTask {
     }
     @TaskAction
     def patch() {
-        println('exec patch task')
+        println configuration.toString()
+
+        // 校验sourceApk是否有效
+        configuration.checkParameter()
+        // 校验patcherId是否有效
+        configuration.buildConfig.checkParameter()
+        // largeModSize不能小于0
+        configuration.res.checkParameter()
+        // dexMode只有两个模式 raw jar
+        configuration.dex.checkDexMode()
+        // 构建压缩环境
+        configuration.sevenZip.resolveZipFinalPath()
     }
 }

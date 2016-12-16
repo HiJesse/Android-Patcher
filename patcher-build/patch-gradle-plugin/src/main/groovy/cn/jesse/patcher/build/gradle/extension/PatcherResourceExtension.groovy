@@ -30,6 +30,7 @@ public class PatcherResourceExtension {
         ignoreChange = []
         largeModSize = 100
     }
+
     void checkParameter() {
         if (largeModSize <= 0) {
             throw new GradleException("largeModSize must be larger than 0")

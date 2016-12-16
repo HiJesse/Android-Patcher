@@ -34,6 +34,9 @@ public class PatcherBuildConfigExtension {
         usingResourceMapping = false
     }
 
+    /**
+     * patcherId 跟sourceApk 权重一样,需要校验是否有效
+     */
     void checkParameter() {
         if (patcherId == null || patcherId.isEmpty()) {
             throw new GradleException("you must set your patcherId to identify the base apk!")

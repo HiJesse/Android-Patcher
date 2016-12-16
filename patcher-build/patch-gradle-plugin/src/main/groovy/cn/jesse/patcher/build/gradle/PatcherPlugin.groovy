@@ -28,6 +28,9 @@ public class PatcherPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
+        // apply os detector插件
+        project.apply plugin: 'osdetector'
+
         // 创建root扩展 patcher
         project.extensions.create('patcher', PatcherExtension)
 
@@ -126,6 +129,7 @@ public class PatcherPlugin implements Plugin<Project> {
             }
 
 
+            // 构建patch任务,验证gradle配置 初始化patch环境
             PatchSchemaTask patchBuildTask = project.tasks.create("patcher${variantName}", PatchSchemaTask)
             patchBuildTask.dependsOn variant.assemble
 

@@ -34,6 +34,9 @@ public class PatcherExtension {
         useSign = true
     }
 
+    /**
+     * 校验sourceApk有效, 并且文件存在
+     */
     void checkParameter() {
         if (sourceApk == null) {
             throw new GradleException("source apk is null, you must set the correct old apk value!")
