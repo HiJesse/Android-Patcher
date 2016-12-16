@@ -1,5 +1,6 @@
 package cn.jesse.patcher.build.gradle.task
 
+import cn.jesse.patcher.build.gradle.PatcherPlugin
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
@@ -7,11 +8,11 @@ public class PatcherTask extends DefaultTask {
 
     PatcherTask() {
         super()
-        group = 'patcher'
+        group = PatcherPlugin.PATCHER_PLUGIN_GROUP
     }
 
     @TaskAction
-    public void test() {
+    def test() {
         println(project.patcher.toString());
         println(project.patcher.buildConfig.toString());
         println(project.patcher.dex.toString());

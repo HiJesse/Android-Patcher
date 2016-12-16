@@ -7,7 +7,12 @@ import cn.jesse.patcher.build.gradle.extension.PatcherLibExtension
 import cn.jesse.patcher.build.gradle.extension.PatcherPackageConfigExtension
 import cn.jesse.patcher.build.gradle.extension.PatcherResourceExtension
 import cn.jesse.patcher.build.gradle.extension.PatcherSevenZipExtension
+import cn.jesse.patcher.build.gradle.task.ManifestTask
+import cn.jesse.patcher.build.gradle.task.MultiDexConfigTask
+import cn.jesse.patcher.build.gradle.task.PatchSchemaTask
 import cn.jesse.patcher.build.gradle.task.PatcherTask
+import cn.jesse.patcher.build.gradle.task.ProguardConfigTask
+import cn.jesse.patcher.build.gradle.task.ResourceIdTask
 import cn.jesse.patcher.build.util.FileOperation
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -18,6 +23,8 @@ import org.gradle.api.UnknownTaskException
  * Created by jesse on 12/12/2016.
  */
 public class PatcherPlugin implements Plugin<Project> {
+    public static final String PATCHER_INTERMEDIATES = "build/intermediates/patcher_intermediates/"
+    public static final String PATCHER_PLUGIN_GROUP = "patcher"
 
     @Override
     void apply(Project project) {
@@ -64,38 +71,38 @@ public class PatcherPlugin implements Plugin<Project> {
 
         // 修改声明 配属属性
         project.afterEvaluate() {
-            project.logger.error("------------------------------------ patcher build warning ------------------------------------")
-            project.logger.error("patcher auto operation: ")
-            project.logger.error("excluding annotation processor and source template from app packaging.")
-            project.logger.error("enable dx jumboMode to reduce package size.")
-            project.logger.error("disable preDexLibraries to prevent ClassDefNotFoundException when your app is booting.")
-            project.logger.error("")
-            project.logger.error("patcher will change your build configs:")
-            project.logger.error("we will add PATCHER_ID=${configuration.buildConfig.patcherId} in your build output manifest file build/intermediates/manifests/full/*")
-            project.logger.error("")
-            project.logger.error("if minifyEnabled is true")
+            project.logger.error("------------------------------------ patcher build info ------------------------------------")
+            println("patcher auto operation: ")
+            println("excluding annotation processor and source template from app packaging.")
+            println("enable dx jumboMode to reduce package size.")
+            println("disable preDexLibraries to prevent ClassDefNotFoundException when your app is booting.")
+            println("")
+            println("patcher will change your build configs:")
+            println("we will add PATCHER_ID=${configuration.buildConfig.patcherId} in your build output manifest file build/intermediates/manifests/full/*")
+            println("")
+            println("if minifyEnabled is true")
 
             String tempMappingPath = configuration.buildConfig.applyMapping
             if (FileOperation.isLegalFile(tempMappingPath)) {
-                project.logger.error("we will build ${project.getName()} apk with apply mapping file ${tempMappingPath}")
+                println("we will build ${project.getName()} apk with apply mapping file ${tempMappingPath}")
             }
 
-//            project.logger.error("you will find the gen proguard rule file at ${TinkerProguardConfigTask.PROGUARD_CONFIG_PATH}")
-            project.logger.error("and we will help you to put it in the proguardFiles.")
-            project.logger.error("")
-            project.logger.error("if multiDexEnabled is true")
-//            project.logger.error("you will find the gen multiDexKeepProguard file at ${TinkerMultidexConfigTask.MULTIDEX_CONFIG_PATH}")
-            project.logger.error("and you should copy it to your own multiDex keep proguard file yourself.")
-            project.logger.error("")
-            project.logger.error("if applyResourceMapping file is exist")
+            println("you will find the gen proguard rule file at ${ProguardConfigTask.PROGUARD_CONFIG_PATH}")
+            println("and we will help you to put it in the proguardFiles.")
+            println("")
+            println("if multiDexEnabled is true")
+            println("you will find the gen multiDexKeepProguard file at ${MultiDexConfigTask.MULTIDEX_CONFIG_PATH}")
+            println("and you should copy it to your own multiDex keep proguard file yourself.")
+            println("")
+            println("if applyResourceMapping file is exist")
             String tempResourceMappingPath = configuration.buildConfig.applyResourceMapping
             if (FileOperation.isLegalFile(tempResourceMappingPath)) {
-                project.logger.error("we will build ${project.getName()} apk with resource R.txt ${tempResourceMappingPath} file")
+                println("we will build ${project.getName()} apk with resource R.txt ${tempResourceMappingPath} file")
             } else {
-                project.logger.error("we will build ${project.getName()} apk with resource R.txt file")
+                println("we will build ${project.getName()} apk with resource R.txt file")
             }
-            project.logger.error("if resources.arsc has changed, you should use applyResource mode to build the new apk!")
-            project.logger.error("-----------------------------------------------------------------------------------------------")
+            println("if resources.arsc has changed, you should use applyResource mode to build the new apk!")
+            project.logger.error("--------------------------------------------------------------------------------------------")
         }
 
         // 遍历所有的variant
@@ -109,13 +116,61 @@ public class PatcherPlugin implements Plugin<Project> {
                 def instantRunTask = project.tasks.getByName("transformClassesWithInstantRunFor${variantName}")
                 if (instantRunTask) {
                     throw new GradleException(
-                            "Tinker does not support instant run mode, please trigger build"
+                            "Patcher does not support instant run mode, please trigger build"
                                     + " by assemble${variantName} or disable instant run"
                                     + " in 'File->Settings...'."
                     )
                 }
             } catch (UnknownTaskException e) {
                 // Not in instant run mode, continue.
+            }
+
+
+            PatchSchemaTask patchBuildTask = project.tasks.create("patcher${variantName}", PatchSchemaTask)
+            patchBuildTask.dependsOn variant.assemble
+
+            patchBuildTask.signConfig = variant.apkVariantData.variantConfiguration.signingConfig
+
+//            variant.outputs.each { output ->
+//                patchBuildTask.buildApkPath = output.outputFile
+//                File parentFile = output.outputFile
+//                patchBuildTask.outputFolder = "${parentFile.getParentFile().getParentFile().getAbsolutePath()}/" + TypedValue.PATH_DEFAULT_OUTPUT + "/" + variant.dirName
+//            }
+
+            // 建立manifest任务,在android manifest文件生成之后插入PATCHER_ID
+            // Create a task to add a build PATCHER_ID to AndroidManifest.xml
+            // This task must be called after "process${variantName}Manifest", since it
+            // requires that an AndroidManifest.xml exists in `build/intermediates`.
+            ManifestTask manifestTask = project.tasks.create("patcherProcess${variantName}Manifest", ManifestTask)
+            manifestTask.manifestPath = variantOutput.processManifest.manifestOutputFile
+            manifestTask.mustRunAfter variantOutput.processManifest
+
+            variantOutput.processResources.dependsOn manifestTask
+
+            //resource id
+            ResourceIdTask applyResourceTask = project.tasks.create("patcherProcess${variantName}ResourceId", ResourceIdTask)
+            applyResourceTask.resDir = variantOutput.processResources.resDir
+            //let applyResourceTask run after manifestTask
+            applyResourceTask.mustRunAfter manifestTask
+
+            variantOutput.processResources.dependsOn applyResourceTask
+
+            // Add this proguard settings file to the list
+            boolean proguardEnable = variant.getBuildType().buildType.minifyEnabled
+
+            if (proguardEnable) {
+                ProguardConfigTask proguardConfigTask = project.tasks.create("patcherProcess${variantName}Proguard", ProguardConfigTask)
+                proguardConfigTask.applicationVariant = variant
+                variantOutput.packageApplication.dependsOn proguardConfigTask
+            }
+
+            // Add this multidex proguard settings file to the list
+            boolean multiDexEnabled = variant.apkVariantData.variantConfiguration.isMultiDexEnabled()
+
+            if (multiDexEnabled) {
+                MultiDexConfigTask multiDexConfigTask = project.tasks.create("patcherProcess${variantName}MultiDexKeep", MultiDexConfigTask)
+                multiDexConfigTask.applicationVariant = variant
+                variantOutput.packageApplication.dependsOn multiDexConfigTask
             }
 
         }
