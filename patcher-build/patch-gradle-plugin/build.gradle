@@ -5,10 +5,8 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.tools.build:gradle:2.1.0'
     compile 'com.google.gradle:osdetector-gradle-plugin:1.2.1'
     compile project(':patcher-build:patch-lib')
-
 }
 
 sourceSets {

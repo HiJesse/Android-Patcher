@@ -14,6 +14,7 @@ import cn.jesse.patcher.build.gradle.task.PatcherTask
 import cn.jesse.patcher.build.gradle.task.ProguardConfigTask
 import cn.jesse.patcher.build.gradle.task.ResourceIdTask
 import cn.jesse.patcher.build.util.FileOperation
+import cn.jesse.patcher.build.util.TypedValue
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -135,11 +136,12 @@ public class PatcherPlugin implements Plugin<Project> {
 
             patchBuildTask.signConfig = variant.apkVariantData.variantConfiguration.signingConfig
 
-//            variant.outputs.each { output ->
-//                patchBuildTask.buildApkPath = output.outputFile
-//                File parentFile = output.outputFile
-//                patchBuildTask.outputFolder = "${parentFile.getParentFile().getParentFile().getAbsolutePath()}/" + TypedValue.PATH_DEFAULT_OUTPUT + "/" + variant.dirName
-//            }
+            // 遍历outputs 拿到apk的output路径
+            variant.outputs.each { output ->
+                patchBuildTask.buildApkPath = output.outputFile
+                File parentFile = output.outputFile
+                patchBuildTask.outputFolder = "${parentFile.getParentFile().getParentFile().getAbsolutePath()}/" + TypedValue.PATH_DEFAULT_OUTPUT + "/" + variant.dirName
+            }
 
             // 建立manifest任务,在android manifest文件生成之后插入PATCHER_ID
             // Create a task to add a build PATCHER_ID to AndroidManifest.xml
