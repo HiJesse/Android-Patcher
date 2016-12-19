@@ -1,6 +1,5 @@
 #Android 
 *.apk
-*.jks
 .gradle
 /gradle
 /local.properties

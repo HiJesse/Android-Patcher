@@ -23,15 +23,31 @@ public class Runner {
 
     private void run(InputParam inputParam) {
         loadConfigFromGradle(inputParam);
-//        try {
-//            Logger.initLogger(config);
-//            patch();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            goToError();
-//        } finally {
-//            Logger.closeLogger();
-//        }
+        try {
+            Logger.initLogger(config);
+            patch();
+        } catch (IOException e) {
+            e.printStackTrace();
+            goToError();
+        } finally {
+            Logger.closeLogger();
+        }
+    }
+
+    protected void patch() {
+        Logger.d("----------------------- Patcher patch begin -----------------------");
+
+        Logger.d(config.toString());
+        try {
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+            goToError();
+        }
+
+        Logger.d("patch done, total time cost: %fs", diffTimeFromBegin());
+        Logger.d("patch done, you can go to file to find the output %s", config.mOutFolder);
+        Logger.d("----------------------- Patcher patch end -------------------------");
     }
 
     private void loadConfigFromGradle(InputParam inputParam) {
@@ -47,5 +63,9 @@ public class Runner {
     public double diffTimeFromBegin() {
         long end = System.currentTimeMillis();
         return (end - mBeginTime) / 1000.0;
+    }
+
+    public void goToError() {
+        System.exit(ERRNO_USAGE);
     }
 }

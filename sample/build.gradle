@@ -17,16 +17,31 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
+    signingConfigs {
+        release {
+            try {
+                storeFile file("default.jks")
+                storePassword "default"
+                keyAlias "default.key"
+                keyPassword "default"
+            } catch (ex) {
+                throw new InvalidUserDataException(ex.toString())
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
 
 //patcher {
-//    sourceApk 'build.gradle' // TODO must be apk
+//    sourceApk 'sample-release.apk'
 //
 //    ignoreWarning true
 //
