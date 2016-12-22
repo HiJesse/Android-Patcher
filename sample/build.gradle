@@ -11,6 +11,7 @@ android {
     }
 
     defaultConfig {
+        multiDexEnabled true
         applicationId "cn.jesse.patchersample"
         minSdkVersion 16
         targetSdkVersion 23
@@ -33,12 +34,13 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
+
 
 //patcher {
 //    sourceApk 'sample-release.apk'
@@ -50,7 +52,7 @@ android {
 //    buildConfig {
 //        patcherId '1.0.0'
 //
-//        applyMapping 'mapping.txt'
+//        applyMapping "${buildDir}/mapping.txt"
 //
 //        applyResourceMapping 'R.txt'
 //    }
@@ -97,5 +99,6 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.2.0'
+    compile 'com.android.support:multidex:1.0.0'
     compile project(':patcher-lib')
 }

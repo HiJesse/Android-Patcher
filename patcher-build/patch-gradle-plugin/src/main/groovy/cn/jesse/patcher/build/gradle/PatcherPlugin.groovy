@@ -164,6 +164,7 @@ public class PatcherPlugin implements Plugin<Project> {
             // Add this proguard settings file to the list
             boolean proguardEnable = variant.getBuildType().buildType.minifyEnabled
 
+            // 如果开启了混淆 就将patcher中默认的混淆信息和基准包的mapping信息加入混淆列表
             if (proguardEnable) {
                 ProguardConfigTask proguardConfigTask = project.tasks.create("patcherProcess${variantName}Proguard", ProguardConfigTask)
                 proguardConfigTask.applicationVariant = variant
@@ -173,6 +174,7 @@ public class PatcherPlugin implements Plugin<Project> {
             // Add this multidex proguard settings file to the list
             boolean multiDexEnabled = variant.apkVariantData.variantConfiguration.isMultiDexEnabled()
 
+            // 如果开启了multiDex 会在编译中间文件生成默认要keep在main dex中的类
             if (multiDexEnabled) {
                 MultiDexConfigTask multiDexConfigTask = project.tasks.create("patcherProcess${variantName}MultiDexKeep", MultiDexConfigTask)
                 multiDexConfigTask.applicationVariant = variant

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.support.multidex.MultiDex;
 import android.util.Log;
 
 //import cn.jesse.patcher.anno.PatcherApplication;
@@ -33,6 +34,7 @@ public class ApplicationProxy extends DefaultApplicationProxy{
     @Override
     public void onBaseContextAttached(Context base) {
         super.onBaseContextAttached(base);
+        MultiDex.install(base);
         Log.d(TAG, getApplicationStartElapsedTime() + "");
         Log.d(TAG, getApplicationStartMillisTime() + "");
 //        Log.d(TAG, getPatcherResultIntent().getExtras().toString());
