@@ -3,7 +3,9 @@ package cn.jesse.patcher.build.util;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Created by jesse on 14/12/2016.
@@ -98,6 +100,59 @@ public class FileOperation {
         if (dir.exists()) {
             FileOperation.deleteDir(dir);
             dir.mkdirs();
+        }
+    }
+
+    public static void copyResourceUsingStream(String name, File dest) throws IOException {
+        FileOutputStream os = null;
+        File parent = dest.getParentFile();
+        if (parent != null && (!parent.exists())) {
+            parent.mkdirs();
+        }
+        InputStream is = null;
+
+        try {
+            is = FileOperation.class.getResourceAsStream("/" + name);
+            os = new FileOutputStream(dest, false);
+
+            byte[] buffer = new byte[TypedValue.BUFFER_SIZE];
+            int length;
+            while ((length = is.read(buffer)) > 0) {
+                os.write(buffer, 0, length);
+            }
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+            if (os != null) {
+                os.close();
+            }
+        }
+    }
+
+    public static void copyFileUsingStream(File source, File dest) throws IOException {
+        FileInputStream is = null;
+        FileOutputStream os = null;
+        File parent = dest.getParentFile();
+        if (parent != null && (!parent.exists())) {
+            parent.mkdirs();
+        }
+        try {
+            is = new FileInputStream(source);
+            os = new FileOutputStream(dest, false);
+
+            byte[] buffer = new byte[TypedValue.BUFFER_SIZE];
+            int length;
+            while ((length = is.read(buffer)) > 0) {
+                os.write(buffer, 0, length);
+            }
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+            if (os != null) {
+                os.close();
+            }
         }
     }
 }

@@ -76,36 +76,36 @@ public class PatcherPlugin implements Plugin<Project> {
         // 修改声明 配属属性
         project.afterEvaluate() {
             project.logger.error("------------------------------------ patcher build info ------------------------------------")
-            println("patcher auto operation: ")
-            println("excluding annotation processor and source template from app packaging.")
-            println("enable dx jumboMode to reduce package size.")
-            println("disable preDexLibraries to prevent ClassDefNotFoundException when your app is booting.")
-            println("")
-            println("patcher will change your build configs:")
-            println("we will add PATCHER_ID=${configuration.buildConfig.patcherId} in your build output manifest file build/intermediates/manifests/full/*")
-            println("")
-            println("if minifyEnabled is true")
+            project.logger.error("patcher auto operation: ")
+            project.logger.error("excluding annotation processor and source template from app packaging.")
+            project.logger.error("enable dx jumboMode to reduce package size.")
+            project.logger.error("disable preDexLibraries to prevent ClassDefNotFoundException when your app is booting.")
+            project.logger.error("")
+            project.logger.error("patcher will change your build configs:")
+            project.logger.error("we will add PATCHER_ID=${configuration.buildConfig.patcherId} in your build output manifest file build/intermediates/manifests/full/*")
+            project.logger.error("")
+            project.logger.error("if minifyEnabled is true")
 
             String tempMappingPath = configuration.buildConfig.applyMapping
             if (FileOperation.isLegalFile(tempMappingPath)) {
-                println("we will build ${project.getName()} apk with apply mapping file ${tempMappingPath}")
+                project.logger.error("we will build ${project.getName()} apk with apply mapping file ${tempMappingPath}")
             }
 
-            println("you will find the gen proguard rule file at ${ProguardConfigTask.PROGUARD_CONFIG_PATH}")
-            println("and we will help you to put it in the proguardFiles.")
-            println("")
-            println("if multiDexEnabled is true")
-            println("you will find the gen multiDexKeepProguard file at ${MultiDexConfigTask.MULTIDEX_CONFIG_PATH}")
-            println("and you should copy it to your own multiDex keep proguard file yourself.")
-            println("")
-            println("if applyResourceMapping file is exist")
+            project.logger.error("you will find the gen proguard rule file at ${ProguardConfigTask.PROGUARD_CONFIG_PATH}")
+            project.logger.error("and we will help you to put it in the proguardFiles.")
+            project.logger.error("")
+            project.logger.error("if multiDexEnabled is true")
+            project.logger.error("you will find the gen multiDexKeepProguard file at ${MultiDexConfigTask.MULTIDEX_CONFIG_PATH}")
+            project.logger.error("and you should copy it to your own multiDex keep proguard file yourself.")
+            project.logger.error("")
+            project.logger.error("if applyResourceMapping file is exist")
             String tempResourceMappingPath = configuration.buildConfig.applyResourceMapping
             if (FileOperation.isLegalFile(tempResourceMappingPath)) {
-                println("we will build ${project.getName()} apk with resource R.txt ${tempResourceMappingPath} file")
+                project.logger.error("we will build ${project.getName()} apk with resource R.txt ${tempResourceMappingPath} file")
             } else {
-                println("we will build ${project.getName()} apk with resource R.txt file")
+                project.logger.error("we will build ${project.getName()} apk with resource R.txt file")
             }
-            println("if resources.arsc has changed, you should use applyResource mode to build the new apk!")
+            project.logger.error("if resources.arsc has changed, you should use applyResource mode to build the new apk!")
             project.logger.error("--------------------------------------------------------------------------------------------")
         }
 
