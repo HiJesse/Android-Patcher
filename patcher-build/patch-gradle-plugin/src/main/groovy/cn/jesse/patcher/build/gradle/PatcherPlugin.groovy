@@ -13,6 +13,7 @@ import cn.jesse.patcher.build.gradle.task.PatchSchemaTask
 import cn.jesse.patcher.build.gradle.task.PatcherTask
 import cn.jesse.patcher.build.gradle.task.ProguardConfigTask
 import cn.jesse.patcher.build.gradle.task.ResourceIdTask
+import cn.jesse.patcher.build.gradle.transform.AuxiliaryInjectTransform
 import cn.jesse.patcher.build.util.FileOperation
 import cn.jesse.patcher.build.util.TypedValue
 import org.gradle.api.GradleException

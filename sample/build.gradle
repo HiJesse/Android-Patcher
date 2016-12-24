@@ -43,7 +43,7 @@ android {
 
 
 //patcher {
-//    sourceApk 'sample-release.apk'
+//    sourceApk "${buildDir}/outputs/apk/sample-release.apk"
 //
 //    ignoreWarning true
 //
@@ -52,7 +52,7 @@ android {
 //    buildConfig {
 //        patcherId '1.0.0'
 //
-//        applyMapping "${buildDir}/mapping.txt"
+//        applyMapping "${buildDir}/outputs/mapping/release/mapping.txt"
 //
 //        applyResourceMapping 'R.txt'
 //    }
@@ -90,8 +90,6 @@ android {
 //
 //    sevenZip {
 //        zipArtifact = "com.tencent.mm:SevenZip:1.1.10"
-//
-////        path = "/usr/local/bin/7za"
 //    }
 //}
 

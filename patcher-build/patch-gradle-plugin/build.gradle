@@ -6,6 +6,7 @@ dependencies {
     compile localGroovy()
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.google.gradle:osdetector-gradle-plugin:1.2.1'
+    compile 'com.android.tools.build:gradle:2.1.0'
     compile project(':patcher-build:patch-lib')
 }
 

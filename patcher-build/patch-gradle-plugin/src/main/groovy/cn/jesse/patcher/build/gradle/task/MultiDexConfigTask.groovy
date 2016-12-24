@@ -44,6 +44,7 @@ public class MultiDexConfigTask extends DefaultTask {
         fr.write(MULTIDEX_CONFIG_SETTINGS)
         fr.write("\n")
 
+        // 将dex.loader中配置的class也keep进main dex
         //unlike proguard, if loader endwith *, we must change to **
         fr.write("#your dex.loader patterns here\n")
         Iterable<String> loader = project.patcher.dex.loader

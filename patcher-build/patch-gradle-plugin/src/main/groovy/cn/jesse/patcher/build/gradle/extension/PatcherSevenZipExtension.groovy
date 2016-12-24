@@ -33,7 +33,7 @@ public class PatcherSevenZipExtension {
         this.project = project
     }
 
-    // 从远程仓库拉下来zip
+    // 从远程仓库拉下来zip 并获取到该artifact的路径
     void resolveZipFinalPath() {
         if (path != null)
             return
