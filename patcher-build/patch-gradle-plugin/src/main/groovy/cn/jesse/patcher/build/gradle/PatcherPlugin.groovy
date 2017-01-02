@@ -56,14 +56,14 @@ public class PatcherPlugin implements Plugin<Project> {
         def android = project.extensions.android
 
         //打包时去除注解的多余文件
-        //add the patcher anno resource to the package exclude option
+        //add the patcher anno resource to the package exclude optionq
         android.packagingOptions.exclude("META-INF/services/javax.annotation.processing.Processor")
         android.packagingOptions.exclude("PatcherApplication.tmpl")
 
         //open jumboMode 默认打开jumboMode
         android.dexOptions.jumboMode = true
 
-        // 可以配合incremental使用, 如果开启preDexLibraries
+        // 如果开启preDexLibraries则可以脱离library编译dex,用来辅助incremental编译. 开启了可能会影响到tinker生成补丁
         //close preDexLibraries
         try {
             android.dexOptions.preDexLibraries = false
