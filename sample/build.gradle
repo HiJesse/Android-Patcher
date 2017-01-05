@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-//apply plugin: 'patcher'
+//apply from: 'patcher.gradle'
 
 android {
     compileSdkVersion 23
@@ -41,57 +41,6 @@ android {
     }
 }
 
-
-//patcher {
-//    sourceApk "${buildDir}/outputs/apk/sample-release.apk"
-//
-//    ignoreWarning true
-//
-//    useSign false
-//
-//    buildConfig {
-//        patcherId '1.0.0'
-//
-//        applyMapping "${buildDir}/outputs/mapping/release/mapping.txt"
-//
-//        applyResourceMapping 'R.txt'
-//    }
-//
-//    dex {
-//        dexMode 'raw'
-//
-//        usePreGeneratedPatchDex true
-//
-//        pattern = ["classes*.dex", "assets/secondary-dex-?.jar"]
-//
-//        loader = ["cn.jesse.patcher.loader.*",
-//                  "cn.jesse.patchersample.MyApplication"]
-//    }
-//
-//    lib {
-//        pattern = ["lib/armeabi/*.so"]
-//    }
-//
-//    res {
-//        pattern = ["res/*", "assets/*", "resources.arsc", "AndroidManifest.xml"]
-//
-//        ignoreChange = ["assets/sample_meta.txt"]
-//
-//        largeModSize = 100
-//    }
-//
-//    packageConfig {
-//        configField("patchMessage", "patcher is sample to use")
-//
-//        configField("platform", "all")
-//
-//        configField("patchVersion", "1.0")
-//    }
-//
-//    sevenZip {
-//        zipArtifact = "com.tencent.mm:SevenZip:1.1.10"
-//    }
-//}
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')

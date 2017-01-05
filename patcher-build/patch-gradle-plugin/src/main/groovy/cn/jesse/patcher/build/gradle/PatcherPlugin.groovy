@@ -71,7 +71,7 @@ public class PatcherPlugin implements Plugin<Project> {
             //no preDexLibraries field, just continue
         }
 
-//        android.registerTransform(new AuxiliaryInjectTransform(project))
+        android.registerTransform(new AuxiliaryInjectTransform(project))
 
 
         // 修改声明 配属属性
