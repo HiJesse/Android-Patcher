@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-//apply from: 'patcher.gradle'
+apply from: 'patcher.gradle'
 
 android {
     compileSdkVersion 23
@@ -37,6 +37,12 @@ android {
             minifyEnabled true
             signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
         }
     }
 }

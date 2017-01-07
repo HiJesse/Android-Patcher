@@ -71,6 +71,7 @@ public class PatcherPlugin implements Plugin<Project> {
             //no preDexLibraries field, just continue
         }
 
+        // 如果开启了usePreGeneratedPatchDex做插桩, 否则作为一个空Transform
         android.registerTransform(new AuxiliaryInjectTransform(project))
 
 
