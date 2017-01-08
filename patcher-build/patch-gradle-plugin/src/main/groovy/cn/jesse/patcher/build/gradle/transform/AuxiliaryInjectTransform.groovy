@@ -10,6 +10,7 @@ import com.android.build.api.transform.TransformInvocation
 import com.google.common.collect.ImmutableSet
 import com.google.common.io.Files
 import groovy.io.FileType
+import groovy.xml.Namespace
 import org.gradle.api.Project
 
 
@@ -29,8 +30,6 @@ public class AuxiliaryInjectTransform extends Transform {
     /* ****** Variant related parameters start ****** */
 
     boolean isInitialized = false
-    def manifestFile = null
-    def appClassName = ''
     def appClassPathName = ''
 
     /* ******  Variant related parameters end  ****** */
@@ -93,9 +92,73 @@ public class AuxiliaryInjectTransform extends Transform {
         return true
     }
 
+    /**
+     * As same as TransformManager.getTaskNamePrefix
+     */
+    private String getTaskNamePrefix(Transform transform) {
+        StringBuilder sb = new StringBuilder(100);
+        sb.append("transform");
+
+        Iterator<QualifiedContent.ContentType> iterator = transform.getInputTypes().iterator();
+        // there's always at least one
+        sb.append(iterator.next().name().toLowerCase(Locale.getDefault()).capitalize());
+        while (iterator.hasNext()) {
+            sb.append("And").append(
+                    iterator.next().name().toLowerCase(Locale.getDefault()).capitalize());
+        }
+
+        sb.append("With").append(transform.getName().capitalize()).append("For");
+
+        return sb.toString();
+    }
+
+    private String toLowerCase(String src) {
+        char[] chars = src.toCharArray()
+        chars[0] += (char) 32
+        return new String(chars)
+    }
+
+    private void initVariantRelatedParamsIfNeeded(String variantName) {
+        if (this.isInitialized) {
+            return
+        }
+
+        def manifestFile = null
+        def appClassName = ''
+
+        // 根据当前variant获取到该variant的manifest文件, 这里使用闭包条件遍历
+        this.applicationVariants.any { variant ->
+            if (variant.name.equals(variantName)) {
+                def variantOutput = variant.outputs.first()
+                manifestFile = variantOutput.processManifest.manifestOutputFile
+                return true  // break out.
+            }
+        }
+
+        // 解析上面拿到的manifest文件,解析并转换出Application的.class绝对路径
+        if (manifestFile != null) {
+            def parsedManifest = new XmlParser().parse(
+                    new InputStreamReader(new FileInputStream(manifestFile), "utf-8"))
+            def androidTag = new Namespace(
+                    'http://schemas.android.com/apk/res/android', 'android')
+            appClassName = parsedManifest.application[0].attribute(androidTag.name)
+
+            if (appClassName != null && appClassName.length() > 0) {
+                this.appClassPathName = appClassName.replace('.', '/') + '.class'
+            }
+        }
+
+        this.isInitialized = true
+    }
+
     @Override
     public void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
         printMsgLog("Inject is %b, incremental is %b", isEnabled, transformInvocation.incremental)
+
+        // 获取完整的transform名字 e.g. sample:transformClassesWithAuxiliaryInjectForRelease
+        // 再自己组装出部分transform名字 e.g. transformClassesWithAuxiliaryInjectFor
+        // 将variant切割出来并转成小写 e.g. release
+        initVariantRelatedParamsIfNeeded(toLowerCase(transformInvocation.context.path.split(getTaskNamePrefix(this))[1]))
 
         // 收集当前Transform的输入数据
         def dirInputs = new HashSet<>()
@@ -131,6 +194,58 @@ public class AuxiliaryInjectTransform extends Transform {
             dirInputs.each { dirInput ->
 
                 if (transformInvocation.isIncremental()) {
+                    // 遍历开启了增量编译才有的changedFiles 返回Map<File, Status>
+                    dirInput.changedFiles.each { entry ->
+                        File fileInput = entry.getKey()
+                        File fileOutput = new File(fileInput.getAbsolutePath().replace(
+                                dirInput.file.getAbsolutePath(), dirOutput.getAbsolutePath()))
+                        if (!fileOutput.exists()) {
+                            fileOutput.getParentFile().mkdirs()
+                        }
+                        final String relativeInputClassPath =
+                                dirInput.file.toPath().relativize(fileInput.toPath())
+                                        .toString().replace('\\', '/')
+
+                        // 获取到Status 根据不同的文件状态分别处理
+                        Status fileStatus = entry.getValue()
+                        switch(fileStatus) {
+                            // ADDED CHANGED类型都需要保留input 并根据场景插桩
+                            case Status.ADDED:
+                            case Status.CHANGED:
+                                if (fileInput.isDirectory()) {
+                                    return // continue.
+                                }
+
+                                // If disabled or not a class file, skip transforming them.
+                                if (!isEnabled || !fileInput.getName().endsWith('.class') || relativeInputClassPath.equals(this.appClassPathName)) {
+                                    printWarnLog('Skipping class: %s', relativeInputClassPath)
+                                    Files.copy(fileInput, fileOutput)
+                                } else {
+                                    printMsgLog('Processing %s file %s',
+                                            fileStatus,
+                                            relativeInputClassPath)
+//                                    AuxiliaryClassInjector.processClass(fileInput, fileOutput)
+                                    Files.copy(fileInput, fileOutput)
+                                }
+                                break
+                            case Status.REMOVED:
+                                // REMOVED类型直接把input删除掉
+                                // Print log if it's enabled only.
+                                if (this.isEnabled) {
+                                    printMsgLog('Removing %s file %s from result.', fileStatus,
+                                            dirOutput.toPath().relativize(fileOutput.toPath()).toString())
+                                }
+
+                                if (fileOutput.exists()) {
+                                    if (fileOutput.isDirectory()) {
+                                        fileOutput.deleteDir()
+                                    } else {
+                                        fileOutput.delete()
+                                    }
+                                }
+                                break
+                        }
+                    }
 
                 } else { // 没有开启增量编译 先清空输出路径
 
@@ -177,8 +292,39 @@ public class AuxiliaryInjectTransform extends Transform {
                 if (!jarOutputFile.exists()) {
                     jarOutputFile.getParentFile().mkdirs()
                 }
-                printMsgLog('Copying Jar %s', jarInputFile.absolutePath)
-                Files.copy(jarInputFile, jarOutputFile)
+
+                // 根据jar的不同状态分别处理
+                switch (jarInput.status) {
+                    case Status.NOTCHANGED:
+                        // NOTCHANGED 和 增量编译同时出现时忽略该文件
+                        if (transformInvocation.incremental) {
+                            break
+                        }
+                    case Status.ADDED:
+                    case Status.CHANGED:
+                        // Print log if it's enabled only.
+                        if (this.isEnabled) {
+                            printMsgLog('Processing %s file %s',
+                                    transformInvocation.incremental ? jarInput.status : Status.ADDED,
+                                    jarInputFile)
+                        }
+
+                        //TODO inject
+                        Files.copy(jarInputFile, jarOutputFile)
+                        break
+                    case Status.REMOVED:
+                        // REMOVED类型直接把input删除掉
+                        // Print log if it's enabled only.
+                        if (this.isEnabled) {
+                            printMsgLog('Removing %s file %s from result.', fileStatus,
+                                    jarOutputFile)
+                        }
+
+                        if (jarOutputFile.exists()) {
+                            jarOutputFile.delete()
+                        }
+                        break
+                }
             }
         }
     }

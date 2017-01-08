@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply from: 'patcher.gradle'
+//apply from: 'patcher.gradle'
 
 android {
     compileSdkVersion 23
@@ -8,6 +8,10 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    dexOptions {
+        incremental true
     }
 
     defaultConfig {
