@@ -1,5 +1,6 @@
 package cn.jesse.patcher.build.gradle.transform
 
+import cn.jesse.patcher.build.auxiliary.AuxiliaryClassInjector
 import cn.jesse.patcher.build.util.MD5
 import com.android.build.api.transform.Format
 import com.android.build.api.transform.QualifiedContent
@@ -135,7 +136,7 @@ public class AuxiliaryInjectTransform extends Transform {
             }
         }
 
-        // 解析上面拿到的manifest文件,解析并转换出Application的.class绝对路径
+        // 解析上面拿到的manifest文件,解析xml文件, 拿到application中android.name 编译过后的路径都为绝对路径
         if (manifestFile != null) {
             def parsedManifest = new XmlParser().parse(
                     new InputStreamReader(new FileInputStream(manifestFile), "utf-8"))
@@ -224,8 +225,9 @@ public class AuxiliaryInjectTransform extends Transform {
                                     printMsgLog('Processing %s file %s',
                                             fileStatus,
                                             relativeInputClassPath)
-//                                    AuxiliaryClassInjector.processClass(fileInput, fileOutput)
-                                    Files.copy(fileInput, fileOutput)
+                                    //TODO inject
+                                    AuxiliaryClassInjector.processClass(fileInput, fileOutput)
+//                                    Files.copy(fileInput, fileOutput)
                                 }
                                 break
                             case Status.REMOVED:
@@ -272,8 +274,7 @@ public class AuxiliaryInjectTransform extends Transform {
                             printMsgLog('Processing %s file %s',
                                     Status.ADDED,
                                     relativeInputClassPath)
-//                            AuxiliaryClassInjector.processClass(fileInput, fileOutput)
-                            Files.copy(fileInput, fileOutput)
+                            AuxiliaryClassInjector.processClass(fileInput, fileOutput)
                         }
 
 
@@ -297,6 +298,7 @@ public class AuxiliaryInjectTransform extends Transform {
                 switch (jarInput.status) {
                     case Status.NOTCHANGED:
                         // NOTCHANGED 和 增量编译同时出现时忽略该文件
+                        //FIXME 直接break会不会有问题, 是否需要删除output文件
                         if (transformInvocation.incremental) {
                             break
                         }

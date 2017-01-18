@@ -10,10 +10,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
-    dexOptions {
-        incremental true
-    }
-
     defaultConfig {
         multiDexEnabled true
         applicationId "cn.jesse.patchersample"
