@@ -63,7 +63,7 @@ public class PatcherPlugin implements Plugin<Project> {
         //open jumboMode 默认打开jumboMode
         android.dexOptions.jumboMode = true
 
-        // 如果开启preDexLibraries则可以脱离library编译dex,用来辅助incremental编译. 开启了可能会影响到tinker生成补丁
+        // 如果开启preDexLibraries则可以脱离library编译dex,用来辅助incremental编译. 开启了可能会影响到补丁的生成
         //close preDexLibraries
         try {
             android.dexOptions.preDexLibraries = false

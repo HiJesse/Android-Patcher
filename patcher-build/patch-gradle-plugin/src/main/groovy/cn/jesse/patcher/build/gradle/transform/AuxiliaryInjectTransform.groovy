@@ -225,9 +225,7 @@ public class AuxiliaryInjectTransform extends Transform {
                                     printMsgLog('Processing %s file %s',
                                             fileStatus,
                                             relativeInputClassPath)
-                                    //TODO inject
                                     AuxiliaryClassInjector.processClass(fileInput, fileOutput)
-//                                    Files.copy(fileInput, fileOutput)
                                 }
                                 break
                             case Status.REMOVED:
@@ -285,6 +283,9 @@ public class AuxiliaryInjectTransform extends Transform {
 
         // 遍历jar文件, 创建对应的输出jar文件, 插桩处理, 然后copy到对应的输出路径
         if (!jarInputs.isEmpty()) {
+            // 储存起来出现过一次的class
+            Map<String, String> entryNameToJarPathMap = new HashMap<>()
+
             jarInputs.each { jarInput ->
                 File jarInputFile = jarInput.file
                 // 这里需要注意第一个参数同DirOutput不同, DIRECTORY格式下是建立一个name路径, 而JAR格式是建立一个name.jar
@@ -306,13 +307,34 @@ public class AuxiliaryInjectTransform extends Transform {
                     case Status.CHANGED:
                         // Print log if it's enabled only.
                         if (this.isEnabled) {
-                            printMsgLog('Processing %s file %s',
+                            printMsgLog('Processing %s jar file %s',
                                     transformInvocation.incremental ? jarInput.status : Status.ADDED,
                                     jarInputFile)
                         }
 
-                        //TODO inject
-                        Files.copy(jarInputFile, jarOutputFile)
+                        AuxiliaryClassInjector.processJar(jarInputFile, jarOutputFile, new AuxiliaryClassInjector.ProcessJarCallback() {
+                            @Override
+                            boolean onProcessClassEntry(String entryName) {
+                                final String lastContainsJarPath = entryNameToJarPathMap.get(entryName)
+                                if (lastContainsJarPath != null) {
+                                    printWarnLog("Duplicate zip entry ${entryName} found in ${lastContainsJarPath} and ${jarInputFile.absolutePath}")
+                                } else {
+                                    entryNameToJarPathMap.put(entryName, jarInputFile.absolutePath)
+                                }
+
+                                // If disabled or not a class file, skip transforming them.
+                                if (!this.isEnabled || !entryName.endsWith('.class')) {
+                                    return false
+                                } else {
+                                    // Skip application class.
+                                    if (entryName.equals(AuxiliaryInjectTransform.this.appClassPathName)) {
+                                        return false
+                                    } else {
+                                        return true;
+                                    }
+                                }
+                            }
+                        })
                         break
                     case Status.REMOVED:
                         // REMOVED类型直接把input删除掉
