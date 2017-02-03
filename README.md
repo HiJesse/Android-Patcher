@@ -8,3 +8,4 @@
 * [Android 热修复方案Tinker(四) 资源补丁加载](http://blog.csdn.net/l2show/article/details/53454933)
 * [Android 热修复方案Tinker(五) SO补丁加载](http://blog.csdn.net/l2show/article/details/53573945)
 * [Android 热修复方案Tinker(六) Gradle插件实现](http://blog.csdn.net/l2show/article/details/53925543)
+* [Android 热修复方案Tinker(七) 插桩实现](http://blog.csdn.net/l2show/article/details/54846682)
